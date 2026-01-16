@@ -1,0 +1,20 @@
+{
+  "popular": [
+    "EDDF", "EDDM", "EDDB", "EDDL", "EDDH", "EDWW", 
+    "EDGG", "EDMM", "GMMM", "KJFK", "EGLL", "OMDB", "RJTT"
+  ],
+  "firs": {
+    "EDGG": "Langen FIR",
+    "EDWW": "Bremen FIR",
+    "EDMM": "Munich FIR",
+    "EDYY": "Maastricht UAC",
+    "GMMM": "Casablanca FIR",
+    "KZNY": "New York Oceanic FIR",
+    "EGTT": "London FIR",
+    "EGPX": "Scottish FIR",
+    "LFMM": "Marseille FIR",
+    "LFFF": "Paris FIR",
+    "LOVV": "Wien FIR",
+    "LSAS": "Switzerland FIR"
+  }
+}
