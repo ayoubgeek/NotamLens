@@ -1,0 +1,10 @@
+fastapi[standard]>=0.112.0  # The high-performance web framework
+uvicorn[standard]>=0.30.0   # The server that runs FastAPI
+pydantic>=2.8.0             # Data validation (The "Bouncer")
+pydantic-settings>=2.4.0    # For managing .env files securely
+requests>=2.32.0            # For making HTTP calls to FAA
+beautifulsoup4>=4.12.0      # For parsing the FAA HTML
+google-generativeai>=0.7.0  # The Gemini AI SDK
+redis>=5.0.1                # For caching (Speed)
+python-dotenv>=1.0.1        # To load secrets locally
+aiohttp>=3.10.0             # Async HTTP client (faster scraping)
