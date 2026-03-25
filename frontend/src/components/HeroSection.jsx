@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import bgImage from '../assets/cockpit-bg.png'; // Ensuring the image import is kept
+import logo from '../assets/logo.svg';
 
 const HeroSection = () => {
   const [icao, setIcao] = useState('');
@@ -33,7 +34,7 @@ const HeroSection = () => {
       <div className="hero-content">
         {/* Branding */}
         <div className="hero-brand">
-            <i className="fa-solid fa-plane-circle-check"></i>
+            <img src={logo} alt="NotamLens Logo" style={{ height: '28px', width: 'auto' }} />
             <span>COMMANDER'S BRIEF</span>
         </div>
 
