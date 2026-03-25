@@ -1,5 +1,7 @@
 # NotamLens
 
+**Live Demo:** [https://www.notamlens.com/](https://www.notamlens.com/)
+
 AI-powered aviation platform that fetches, analyzes, and visualizes NOTAMs using LLMs and interactive maps.
 
 ## 1. 🚀 Overview
