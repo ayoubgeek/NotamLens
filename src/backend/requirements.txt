@@ -8,3 +8,4 @@ google-generativeai>=0.7.0  # The Gemini AI SDK
 redis>=5.0.1                # For caching (Speed)
 python-dotenv>=1.0.1        # To load secrets locally
 aiohttp>=3.10.0             # Async HTTP client (faster scraping)
+openai>=1.0.0               # For Groq API (compatible SDK)

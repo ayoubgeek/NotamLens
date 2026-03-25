@@ -31,7 +31,7 @@ async def health_check():
     return {
         "status": "operational", 
         "env": "debug" if settings.DEBUG_MODE else "production",
-        "system": "Agent NOTAM v1"
+        "system": "NotamLens v1"
     }
 
 # --- Router Registration ---

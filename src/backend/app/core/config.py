@@ -4,17 +4,18 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     # App Identity
-    PROJECT_NAME: str = "Agent NOTAM"
+    PROJECT_NAME: str = "NotamLens"
     API_V1_STR: str = "/api/v1"
     
     # Debug Toggle
     # Note: Keep False in production. Leaking stack traces to users is a security risk.
     DEBUG_MODE: bool = False
     
-    # Secrets
+    # Secret
     # If this is missing from .env, Pydantic will throw a validation error at startup.
     # Better to crash now than fail silently later when a user tries to run a query.
-    GEMINI_API_KEY: str
+    GEMINI_API_KEY: str | None = None
+    GROQ_API_KEY: str | None = None
     
     # Infrastructure
     # Defaulting to local Redis. If we deploy to AWS, override this env var.

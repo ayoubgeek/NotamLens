@@ -3,7 +3,7 @@ import React from 'react';
 const Header = ({ airport, setAirport, handleSearch, loading, popularAirports }) => {
   return (
     <div className="hero-section">
-      <h1>Agent NOTAM</h1>
+      <h1>NotamLens</h1>
       <p className="subtitle">Next-Gen Aeronautical Intelligence Engine</p>
       <div className="search-container">
         <div className="search-box">

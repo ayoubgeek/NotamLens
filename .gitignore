@@ -15,3 +15,15 @@ build/
 
 # Logs
 *.log
+
+# AI agent instruction files — local only, never push
+*.md
+!README.md
+
+# AI agent config folders — local only
+.agent/
+.specifyit/
+.specify/
+.claude/
+.cursor/
+.windsurf/

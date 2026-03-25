@@ -958,6 +958,28 @@ input {
   font-size: 0.95rem; 
 }
 
+/* AI Disclaimer Banner */
+.ai-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  margin-top: 8px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: #92823a;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+
+.ai-disclaimer i {
+  color: #d97706;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
 /* =========================================
    10. STATES: EMPTY, ACTIVE & ERRORS
    ========================================= */
