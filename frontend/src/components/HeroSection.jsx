@@ -34,8 +34,7 @@ const HeroSection = () => {
       <div className="hero-content">
         {/* Branding */}
         <div className="hero-brand">
-            <img src={logo} alt="NotamLens Logo" style={{ height: '28px', width: 'auto' }} />
-            <span>COMMANDER'S BRIEF</span>
+            <img src={logo} alt="NotamLens Logo" style={{ height: '60px', width: 'auto' }} />
         </div>
 
         {/* Main Headline */}
