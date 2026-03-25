@@ -20,6 +20,7 @@ app.add_middleware(
     allow_origins=[
         "https://notamlens.com",
         "https://www.notamlens.com", 
+        "https://notamlens-frontend.vercel.app",
         "http://localhost:5173",
         "http://127.0.0.1:5173"
     ], 
