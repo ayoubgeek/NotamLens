@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-
 import L from 'leaflet';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+const customIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 // Helper to move the camera when searching
@@ -37,7 +38,7 @@ const MapWrapper = ({ center, markers }) => {
         <MapUpdater center={center} />
 
         {markers && markers.map((marker, idx) => (
-          <Marker key={idx} position={marker.position}>
+          <Marker key={idx} position={marker.position} icon={customIcon}>
             <Popup>
               <div className="text-slate-900 font-bold">{marker.code}</div>
               <div className="text-slate-700">{marker.name}</div>
