@@ -39,14 +39,9 @@ class AIEngine:
             
         print(f"🧠 AI Engine: Connecting to Groq...")
         try:
-            import httpx
-            # Supplying our own httpx client prevents openai from crashing 
-            # if installed httpx >= 0.28.0 (which removed 'proxies' kwarg).
-            http_client = httpx.Client()
             return OpenAI(
                 base_url="https://api.groq.com/openai/v1",
-                api_key=current_key,
-                http_client=http_client
+                api_key=current_key
             )
         except Exception as e:
             print(f"⚠️ OpenAI Init Failed: {e}")
