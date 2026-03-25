@@ -21,13 +21,20 @@ class _RedisCache:
         self._r = redis.from_url(url, decode_responses=True)
 
     def get(self, key: str):
-        raw = self._r.get(key)
-        if raw is None:
+        try:
+            raw = self._r.get(key)
+            if raw is None:
+                return None
+            return json.loads(raw)
+        except Exception as e:
+            print(f"Redis get error: {e}")
             return None
-        return json.loads(raw)
 
     def set(self, key: str, value, ttl: int = 1800):
-        self._r.setex(key, ttl, json.dumps(value, default=str))
+        try:
+            self._r.setex(key, ttl, json.dumps(value, default=str))
+        except Exception as e:
+            print(f"Redis set error: {e}")
 
 
 class _DictCache:
