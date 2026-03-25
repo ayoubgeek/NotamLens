@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { formatDate, decodeQCode, reconstructRawICAO, parseCoordinates, parseRadius } from '../../utils/formatters';
+
+const customIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 // --- INTERNAL COMPONENT: MAP AUTO-FIT ---
 function MapAutoFit({ center }) {
@@ -120,7 +131,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                         <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
                         <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}" />
                         <Circle center={mapCoords} radius={radiusMeters} pathOptions={{ color: riskColor, fillColor: riskColor, fillOpacity: 0.2 }} />
-                        <Marker position={mapCoords}>
+                        <Marker position={mapCoords} icon={customIcon}>
                             <Popup>
                                 <div className="popup-header" style={{ background: riskColor }}>NOTAM {notam.notam_id}</div>
                                 <div className="popup-body">
