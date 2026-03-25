@@ -1,6 +1,7 @@
 import os
 import json
 import hashlib
+import traceback
 from openai import OpenAI
 from app.services.cache import cache
 from app.core.config import settings
@@ -35,16 +36,20 @@ class AIEngine:
         """
         current_key = self.api_key or os.environ.get("GROQ_API_KEY") or getattr(settings, "GROQ_API_KEY", None)
         if not current_key:
+            print("⚠️ No API key found in env or settings")
             return None
             
-        print(f"🧠 AI Engine: Connecting to Groq...")
+        print(f"🧠 AI Engine: Connecting to Groq (key starts with {current_key[:8]}...)")
         try:
-            return OpenAI(
+            client = OpenAI(
                 base_url="https://api.groq.com/openai/v1",
                 api_key=current_key
             )
+            print(f"✅ AI Engine: Client initialized successfully")
+            return client
         except Exception as e:
             print(f"⚠️ OpenAI Init Failed: {e}")
+            print(f"⚠️ Traceback: {traceback.format_exc()}")
             raise AIAnalysisException(f"AI Engine Init Failed: {str(e)}")
 
     def analyze_risk(self, raw_text: str) -> AIAnalysisResult:
@@ -70,17 +75,22 @@ class AIEngine:
         result = None
         try:
             # Attempt 1: Execute with Primary
+            print(f"🚀 Attempting primary model: {self.primary_model_name}")
             result = self._execute_analysis(raw_text, self.primary_model_name)
         except Exception as e:
-            print(f"⚠️ Primary Model Failed ({e}). Switching to Fallback...")
+            print(f"⚠️ Primary Model Failed: {type(e).__name__}: {e}")
+            print(f"⚠️ Primary Traceback: {traceback.format_exc()}")
             
             # Attempt 2: Hot-swap to Backup Model (Redundancy)
             try:
+                print(f"🔄 Switching to backup model: {self.backup_model_name}")
                 result = self._execute_analysis(raw_text, self.backup_model_name)
             except Exception as final_error:
                 # Critical Failure: Both engines are dead.
-                print(f"❌ CRITICAL: Both AI models failed: {final_error}")
-                raise AIAnalysisException()
+                print(f"❌ CRITICAL: Both AI models failed.")
+                print(f"❌ Final error: {type(final_error).__name__}: {final_error}")
+                print(f"❌ Final Traceback: {traceback.format_exc()}")
+                raise AIAnalysisException(f"Both AI models failed. Error: {str(final_error)}")
         
         # PHASE 3: Save to Cache
         # Store the successful result so the next request gets it instantly.
@@ -246,6 +256,13 @@ Return a JSON object with this exact schema:
             # 3. Parse to Dictionary
             data = json.loads(clean_json.strip())
             
+            # 3.5 Type coercion: Groq sometimes returns risk_score as string
+            if "risk_score" in data and isinstance(data["risk_score"], str):
+                try:
+                    data["risk_score"] = int(data["risk_score"])
+                except ValueError:
+                    data["risk_score"] = 50  # Default to medium if unparseable
+            
             # 4. Computed Fields (Business Logic)
             if "risk_level" not in data:
                 s = data.get("risk_score", 0)
@@ -255,8 +272,10 @@ Return a JSON object with this exact schema:
                 else: data["risk_level"] = "LOW"
             
             # 5. Validate against Schema (Pydantic)
+            print(f"✅ AI Analysis complete. Risk: {data.get('risk_level')} ({data.get('risk_score')})")
             return AIAnalysisResult(**data)
             
         except Exception as e:
-            print(f"Parsing/Generation Error: {e}")
+            print(f"❌ Parsing/Generation Error for model {model_name}: {type(e).__name__}: {e}")
+            print(f"❌ Traceback: {traceback.format_exc()}")
             raise e
