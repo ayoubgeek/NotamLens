@@ -1,28 +1,26 @@
 import requests
 import re
-from cachetools import TTLCache
+from app.services.cache import cache
 from app.schemas.notam import NotamSchema, NotamType
 from app.core.exceptions import FaaScraperException
 
 class FaaScraper:
     BASE_URL = "https://notams.aim.faa.gov/notamSearch/search"
-    
+
     def __init__(self):
         self.session = requests.Session()
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         }
-        # --- CACHE CONFIGURATION ---
-        # Stores up to 100 airports.
-        # Data expires after 1800 seconds (30 Minutes).
-        self.cache = TTLCache(maxsize=100, ttl=1800)
 
     def fetch_notams(self, icao: str):
         # 1. CHECK CACHE FIRST
-        if icao in self.cache:
+        cache_key = f"notams:{icao.upper()}"
+        cached = cache.get(cache_key)
+        if cached is not None:
             print(f"⚡ CACHE HIT: Serving stored data for {icao} (Instant Load)")
-            return self.cache[icao]
+            return cached
 
         # 2. IF NOT IN CACHE, FETCH FROM API
         print(f"📡 API: Fetching fresh data for {icao}...")
@@ -52,7 +50,7 @@ class FaaScraper:
             clean_results = self._clean_list(data['notamList'], icao)
             
             # 3. STORE IN CACHE FOR NEXT TIME
-            self.cache[icao] = clean_results
+            cache.set(cache_key, clean_results, ttl=1800)
             return clean_results
 
         except Exception as e:

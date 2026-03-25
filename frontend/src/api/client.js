@@ -4,7 +4,7 @@ import axios from 'axios';
 const apiClient = axios.create({
   // The base URL is a relative path. 
   // Vite's proxy (configured earlier) will forward '/api' to Python on port 8000.
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

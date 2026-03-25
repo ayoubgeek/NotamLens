@@ -1,8 +1,8 @@
 import os
 import json
 import hashlib
-from cachetools import TTLCache
 from openai import OpenAI
+from app.services.cache import cache
 from app.core.config import settings
 from app.schemas.analysis import AIAnalysisResult
 from app.core.exceptions import AIAnalysisException
@@ -32,10 +32,6 @@ class AIEngine:
         self.primary_model_name = "llama-3.1-8b-instant" # Fast, low latency
         self.backup_model_name = "mixtral-8x7b-32768"    # High capacity fallback
         
-        # --- PERFORMANCE: IN-MEMORY CACHE ---
-        # We store the results of the last 1000 analyses for 1 hour (3600s).
-        self.cache = TTLCache(maxsize=1000, ttl=3600)
-        
         # Initialize the client
         self.client = self._init_client()
 
@@ -62,11 +58,11 @@ class AIEngine:
         """
         
         # PHASE 0: Cache Lookup (Optimization)
-        cache_key = self._generate_cache_key(raw_text)
-        
-        if cache_key in self.cache:
+        cache_key = f"ai:{self._generate_cache_key(raw_text)}"
+        cached = cache.get(cache_key)
+        if cached is not None:
             print(f"⚡ CACHE HIT: Serving AI analysis for key {cache_key[:8]}... (Zero Latency)")
-            return self.cache[cache_key]
+            return AIAnalysisResult(**cached) if isinstance(cached, dict) else cached
         
         # PHASE 1: Initialization Check
         if not self.client:
@@ -93,7 +89,7 @@ class AIEngine:
         
         # PHASE 3: Save to Cache
         # Store the successful result so the next request gets it instantly.
-        self.cache[cache_key] = result
+        cache.set(cache_key, result.model_dump(), ttl=3600)
         return result
 
     def _generate_cache_key(self, text: str) -> str:
