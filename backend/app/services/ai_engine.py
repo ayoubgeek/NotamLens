@@ -20,13 +20,7 @@ class AIEngine:
 
     def __init__(self):
         # SECURITY: Ensure API Key exists before initializing. 
-        # Fails fast at startup if configuration is missing.
-        # Check for GROQ_API_KEY first, falling back to what's in settings
-        self.api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
-        
-        if not self.api_key:
-            print("⚠️ GROQ_API_KEY missing from settings or .env. AI features will fail.")
-            # We don't raise here to allow the app to start, but requests will fail.
+        self.api_key = os.environ.get("GROQ_API_KEY") or settings.GROQ_API_KEY
         
         # --- STRATEGY: DUAL MODEL CONFIGURATION ---
         self.primary_model_name = "llama-3.1-8b-instant" # Fast, low latency
@@ -39,18 +33,19 @@ class AIEngine:
         """
         Safe Client Loader: Attempts to connect to Groq.
         """
+        current_key = self.api_key or os.environ.get("GROQ_API_KEY") or getattr(settings, "GROQ_API_KEY", None)
+        if not current_key:
+            return None
+            
+        print(f"🧠 AI Engine: Connecting to Groq...")
         try:
-            if not self.api_key:
-                return None
-                
-            print(f"🧠 AI Engine: Connecting to Groq...")
             return OpenAI(
                 base_url="https://api.groq.com/openai/v1",
-                api_key=self.api_key
+                api_key=current_key
             )
         except Exception as e:
-            print(f"⚠️ Init Failed: {e}")
-            return None
+            print(f"⚠️ OpenAI Init Failed: {e}")
+            raise AIAnalysisException(f"AI Engine Init Failed: {str(e)}")
 
     def analyze_risk(self, raw_text: str) -> AIAnalysisResult:
         """
