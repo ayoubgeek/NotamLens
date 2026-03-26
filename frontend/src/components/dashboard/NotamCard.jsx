@@ -27,11 +27,11 @@ const CollapsibleText = ({ text }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     if (!text) return null;
     const isLong = text.length > 200;
-    const displayText = isExpanded || !isLong ? text : text.substring(0, 200) + "...";
+    const displayText = isExpanded || !isLong ? text : text.substring(0, 200) + (isExpanded ? '' : '...');
 
     return (
-        <div className="w-full">
-            <div className="font-mono text-[14px] md:text-[15px] leading-[1.6] text-slate-200 bg-slate-900/40 p-[16px] rounded-[12px] border border-slate-700/50 break-words w-full shadow-inner">
+        <div className="w-full bg-slate-900/40 rounded-[12px] border border-slate-700/50 shadow-inner overflow-hidden flex flex-col transition-all duration-300">
+            <div className={`font-mono text-[14px] md:text-[15px] leading-[1.6] text-slate-200 p-[16px] break-words w-full ${!isExpanded && isLong ? 'pb-[8px]' : ''}`}>
                 {displayText}
             </div>
             {isLong && (
@@ -40,9 +40,10 @@ const CollapsibleText = ({ text }) => {
                         e.stopPropagation();
                         setIsExpanded(!isExpanded);
                     }}
-                    className="flex justify-center items-center gap-2 text-blue-400 hover:text-blue-300 font-bold text-[13px] md:text-[14px] mt-2 w-full min-h-[44px] transition-colors hover:bg-slate-800/60 rounded-[8px] outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex justify-center items-center gap-2 text-blue-400 hover:text-blue-300 font-bold text-[12px] tracking-widest uppercase w-full py-[12px] bg-slate-800/40 hover:bg-slate-700/50 transition-colors border-t border-slate-700/30 outline-none"
+                    aria-label={isExpanded ? "Collapse full text" : "Read full text"}
                 >
-                    {isExpanded ? <><i className="fa-solid fa-chevron-up"></i> COLLAPSE</> : <><i className="fa-solid fa-chevron-down"></i> READ FULL TEXT</>}
+                    {isExpanded ? <><i className="fa-solid fa-chevron-up"></i> SHOW LESS</> : <><i className="fa-solid fa-chevron-down"></i> READ FULL TEXT</>}
                 </button>
             )}
         </div>
