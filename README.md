@@ -113,10 +113,4 @@ This project was developed as a **Projet de Fin d'Études (PFE)**. It demonstrat
 - **Applied AI:** Moving beyond simple conversational chatbots to strict JSON-enforced, rule-based inference.
 - **Modern UI/UX:** Translating dense data blocks into an elegant, highly-scannable interface designed for mission-critical environments.
 
-## 🔜 Future Improvements
-- **Real-Time Data Pipelines:** Migrating from pull-based scraping to persistent upstream WebSockets.
-- **Spatial Intersections:** Implementing multi-ICAO querying and route-intersection detection for en-route flight planning.
-- **User Authentication:** Enabling pilot profiles to save custom fleet layouts (e.g., filtering out A320 limitations when flying a B737).
 
----
-*Built with passion for Aviation & AI.*
