@@ -10,7 +10,6 @@ function Dashboard() {
   const { icao } = useParams();
   const navigate = useNavigate();
 
-  // state...
   const [notams, setNotams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +25,6 @@ function Dashboard() {
   const [airportDatabase, setAirportDatabase] = useState(AIRPORT_CONFIG.firs); 
   const [airportName, setAirportName] = useState('');
 
-  // effects...
   useEffect(() => {
     const fetchAirportData = async () => {
       try {
@@ -164,7 +162,6 @@ function Dashboard() {
             />
 
             <div className="results w-full flex flex-col items-center justify-center gap-4">
-            {/* --- UPDATED NO RESULTS DESIGN --- */}
             {filteredNotams.length === 0 && (
                 <div className="empty-state-card flex flex-col items-center justify-center text-center p-8 md:p-12 lg:p-16 bg-gradient-to-b from-slate-800/60 to-slate-900/80 border border-slate-700/50 rounded-2xl shadow-xl w-full animate-[fadeInUp_0.3s_ease-out]">
                     <div className="empty-icon-wrapper text-5xl md:text-6xl text-slate-600 mb-6 drop-shadow-md">

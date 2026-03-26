@@ -10,29 +10,24 @@ from app.core.exceptions import AIAnalysisException
 
 class AIEngine:
     """
-    Core Intelligence Service for the Tactical NOTAM System.
-    
-    Responsibilities:
-    1. Manages connection to Groq API (via OpenAI SDK).
-    2. Implements a "Self-Healing" failover strategy (Primary -> Backup).
-    3. Caches analysis results to minimize API costs and latency.
-    4. Standardizes AI output into strict JSON for the frontend.
+    Core Intelligence Service for NOTAM analysis.
+    Implements model failover, caching, and strict JSON output standardization.
     """
 
     def __init__(self):
-        # SECURITY: Ensure API Key exists before initializing. 
+        # Ensure API Key exists before initializing.
         self.api_key = os.environ.get("GROQ_API_KEY") or settings.GROQ_API_KEY
         
-        # --- STRATEGY: DUAL MODEL CONFIGURATION ---
-        self.primary_model_name = "llama-3.1-8b-instant" # Fast, low latency
-        self.backup_model_name = "mixtral-8x7b-32768"    # High capacity fallback
+        # --- Dual Model Configuration ---
+        self.primary_model_name = "llama-3.1-8b-instant"
+        self.backup_model_name = "mixtral-8x7b-32768"
         
         # Initialize the client
         self.client = self._init_client()
 
     def _init_client(self):
         """
-        Safe Client Loader: Attempts to connect to Groq.
+        Initializes the Groq client via OpenAI SDK.
         """
         current_key = self.api_key or os.environ.get("GROQ_API_KEY") or getattr(settings, "GROQ_API_KEY", None)
         if not current_key:
@@ -57,21 +52,21 @@ class AIEngine:
         Public Entry Point: Analyze a NOTAM string.
         """
         
-        # PHASE 0: Cache Lookup (Optimization)
+        # Cache Lookup
         cache_key = f"ai:{self._generate_cache_key(raw_text)}"
         cached = cache.get(cache_key)
         if cached is not None:
             print(f"⚡ CACHE HIT: Serving AI analysis for key {cache_key[:8]}... (Zero Latency)")
             return AIAnalysisResult(**cached) if isinstance(cached, dict) else cached
         
-        # PHASE 1: Initialization Check
+        # Initialization Check
         if not self.client:
-             # Try to re-init in case key was added late (unlikely but good practice)
+             # Attempt re-initialization if client is missing.
              self.client = self._init_client()
              if not self.client:
                 raise AIAnalysisException("AI Engine Offline. Missing API Key.")
 
-        # PHASE 2: Execution & Failover
+        # Execution & Failover
         result = None
         try:
             # Attempt 1: Execute with Primary
@@ -81,36 +76,33 @@ class AIEngine:
             print(f"⚠️ Primary Model Failed: {type(e).__name__}: {e}")
             print(f"⚠️ Primary Traceback: {traceback.format_exc()}")
             
-            # Attempt 2: Hot-swap to Backup Model (Redundancy)
+            # Hot-swap to Backup Model
             try:
                 print(f"🔄 Switching to backup model: {self.backup_model_name}")
                 result = self._execute_analysis(raw_text, self.backup_model_name)
             except Exception as final_error:
-                # Critical Failure: Both engines are dead.
+                # Critical Failure: Both models failed.
                 print(f"❌ CRITICAL: Both AI models failed.")
                 print(f"❌ Final error: {type(final_error).__name__}: {final_error}")
                 print(f"❌ Final Traceback: {traceback.format_exc()}")
                 raise AIAnalysisException(f"Both AI models failed. Error: {str(final_error)}")
         
-        # PHASE 3: Save to Cache
-        # Store the successful result so the next request gets it instantly.
+        # Persist to Cache
         cache.set(cache_key, result.model_dump(), ttl=3600)
         return result
 
     def _generate_cache_key(self, text: str) -> str:
         """
-        Utility: Creates a compact MD5 hash of the text.
+        Creates an MD5 hash of the input text for cache indexing.
         """
         return hashlib.md5(text.encode('utf-8')).hexdigest()
 
     def _execute_analysis(self, raw_text: str, model_name: str) -> AIAnalysisResult:
         """
-        Internal Logic: Prompt Engineering & JSON Parsing.
+        Execution of the LLM prompt and JSON response parsing.
         """
         
-        # --- PROMPT ENGINEERING (v4 — Expert-Grade Intelligence) ---
-        # Targeting 9+/10 on accuracy, helpfulness, and actionability
-        # Fixes from v3: phase-of-flight misattribution, NOTAM misinterpretation
+        # --- System Prompt ---
         
         system_prompt = """You are a Senior Check Airman, Type Rating Examiner, and Flight Safety Officer on Boeing 737-800/MAX with 25,000+ hours.
 You are conducting a pre-departure NOTAM briefing. Your briefing must be factually flawless and operationally actionable.
@@ -234,7 +226,7 @@ Return a JSON object with this exact schema:
 }}"""
         
         try:
-            # 1. Generate Content
+            # Generate Content
             response = self.client.chat.completions.create(
                 model=model_name,
                 messages=[
@@ -247,23 +239,23 @@ Return a JSON object with this exact schema:
             
             clean_json = response.choices[0].message.content.strip()
             
-            # 2. JSON Hygiene (Sanitization) - Just in case
+            # JSON Cleanup
             if "```json" in clean_json:
                 clean_json = clean_json.split("```json")[1].split("```")[0]
             elif "```" in clean_json:
                 clean_json = clean_json.split("```")[0]
 
-            # 3. Parse to Dictionary
+            # Parse to Dictionary
             data = json.loads(clean_json.strip())
             
-            # 3.5 Type coercion: Groq sometimes returns risk_score as string
+            # Type coercion: Groq may return risk_score as string
             if "risk_score" in data and isinstance(data["risk_score"], str):
                 try:
                     data["risk_score"] = int(data["risk_score"])
                 except ValueError:
                     data["risk_score"] = 50  # Default to medium if unparseable
             
-            # 4. Computed Fields (Business Logic)
+            # Compute Risk Level
             if "risk_level" not in data:
                 s = data.get("risk_score", 0)
                 if s >= 75: data["risk_level"] = "CRITICAL"
@@ -271,7 +263,7 @@ Return a JSON object with this exact schema:
                 elif s >= 25: data["risk_level"] = "MEDIUM"
                 else: data["risk_level"] = "LOW"
             
-            # 5. Validate against Schema (Pydantic)
+            # Validate Output Schema
             print(f"✅ AI Analysis complete. Risk: {data.get('risk_level')} ({data.get('risk_score')})")
             return AIAnalysisResult(**data)
             

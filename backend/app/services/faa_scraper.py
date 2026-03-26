@@ -15,14 +15,14 @@ class FaaScraper:
         }
 
     def fetch_notams(self, icao: str):
-        # 1. CHECK CACHE FIRST
+        # Check cache
         cache_key = f"notams:{icao.upper()}"
         cached = cache.get(cache_key)
         if cached is not None:
             print(f"⚡ CACHE HIT: Serving stored data for {icao} (Instant Load)")
             return cached
 
-        # 2. IF NOT IN CACHE, FETCH FROM API
+        # Fetch from API
         print(f"📡 API: Fetching fresh data for {icao}...")
         
         payload = {
@@ -49,7 +49,7 @@ class FaaScraper:
             # Clean the data
             clean_results = self._clean_list(data['notamList'], icao)
             
-            # 3. STORE IN CACHE FOR NEXT TIME
+            # Update cache
             cache.set(cache_key, clean_results, ttl=1800)
             return clean_results
 
@@ -61,29 +61,28 @@ class FaaScraper:
         clean_data = []
         
         for item in raw_list:
-            # 1. Get Raw Text
+            # Locate raw text
             raw_text = item.get('icaoMessage', '') or item.get('traditionalMessage', '')
             if not raw_text: continue
 
             notam_id = item.get('notamNumber', 'UNKNOWN')
             
-            # 2. Extract Q-Line (Critical for MAP)
+            # Extract Q-Code line
             q_line_raw = self._extract_field(raw_text, r"Q\)\s*(.*?)(?:\s+[A-Z]\)|$)")
             q_data = self._parse_q_line(q_line_raw) 
             
-            # 3. Extract Clean Message (Critical for CARD BODY)
-            # Looks for text between "E)" and the next field or end of string
+            # Extract main message body (typically follows 'E)')
             message = self._extract_field(raw_text, r"(?:E\)|TEXT:)\s*(.*?)(?:\s+[F-G]\)|$)")
             
             # Fallback: If we can't find E), use raw text
             if not message:
                 message = raw_text
 
-            # 4. Determine Classification
+            # Determine NOTAM classification
             raw_type = item.get('type', 'UNK')
             classification = "NOTAM_D" if raw_type in ['N', 'R'] else "FDC"
 
-            # 5. Build Object
+            # Construct representation
             notam_obj = {
                 "notam_id": notam_id,
                 "icao": icao.upper(),
@@ -98,14 +97,14 @@ class FaaScraper:
             
         return clean_data
 
-    # --- HELPERS ---
+    # --- Utility Methods ---
     def _extract_field(self, text, pattern):
         match = re.search(pattern, text, re.DOTALL)
         return match.group(1).strip() if match else ""
 
     def _parse_q_line(self, q_string):
         """
-        Parses the hidden Q-Code line to find GPS coordinates.
+        Parses the Q-Code line to extract coordinates and radii.
         """
         if not q_string: return None
         

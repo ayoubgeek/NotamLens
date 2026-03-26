@@ -79,7 +79,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
     return (
         <div className="relative p-[16px] flex flex-col bg-slate-800 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-slate-700 transition-transform w-full overflow-hidden mb-[16px] md:mb-[20px] focus-within:border-slate-500 group" style={{ borderLeft: `3px solid ${riskColor}` }}>
             
-            {/* [HEADER] */}
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[12px] w-full pb-[12px] md:pb-[16px] mb-[12px] md:mb-[16px]">
                 <div className="flex items-center gap-[12px] w-full md:w-auto">
                     {priority === 3 && <i className="fa-solid fa-triangle-exclamation text-red-500 text-[18px]"></i>}
@@ -99,7 +99,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                 </button>
             </div>
 
-            {/* [META] Chips */}
+            {/* Metadata Chips */}
             {notam.q_data && (
                 <div className="flex flex-wrap gap-[8px] w-full mb-[16px] md:mb-[20px]">
                     {/* FIR */}
@@ -165,7 +165,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                 </div>
             )}
 
-            {/* [Time] Dates */}
+            {/* Validity Periods */}
             <div className="flex flex-col md:flex-row bg-slate-900/80 rounded-[12px] border border-slate-700/50 mb-[16px] md:mb-[20px] overflow-hidden">
                 <div className="flex flex-col w-full p-[16px]">
                     <label className="text-[11px] md:text-[12px] text-slate-400 font-bold mb-[4px] tracking-[0.5px] uppercase">EFFECTIVE FROM</label>
@@ -179,7 +179,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                 </div>
             </div>
 
-            {/* [Body] Message */}
+            {/* NOTAM Body */}
             <div className="mb-[12px] md:mb-[16px]">
               <CollapsibleText text={notam.message || notam.raw_text} />
             </div>
@@ -191,7 +191,7 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                 </div>
             )}
 
-            {/* [Action] Primary Buttons */}
+            {/* Primary Actions */}
             <div className="flex flex-col sm:flex-row items-center gap-[12px] w-full pt-[12px] mt-auto">
                 {/* Mobile View Raw Button */}
                 <button 

@@ -57,7 +57,7 @@ const StatsPanel = ({
         </p>
       </div>
 
-      {/* FILTER TOP BAR: ALL / CRITICAL - Pinned for visibility */}
+      {/* Primary Filter Bar */}
       <div className="flex flex-col md:flex-row flex-wrap items-center justify-between gap-[16px] bg-slate-800 p-[16px] rounded-[16px] border border-slate-700 w-full shadow-sm mb-[24px]">
         <div className="flex flex-nowrap w-full md:w-auto gap-[8px]">
             <button 
@@ -74,7 +74,7 @@ const StatsPanel = ({
             </button>
         </div>
 
-        {/* Category Pills (Wrapping nicely) */}
+        {/* Category Filters */}
         <div className="flex flex-wrap items-center gap-[8px] w-full md:w-auto ml-0 md:ml-auto">
             {Object.entries({ RUNWAYS: [categories.runways, 'Runways'], TAXIWAYS: [categories.taxiways, 'Taxiways'], APRONS: [categories.aprons, 'Aprons'], LIGHTING: [categories.lighting, 'Lighting'], NAVAIDS: [categories.nav, 'Nav Aids'] }).map(([key, [count, label]]) => (
                 <button 
@@ -89,7 +89,7 @@ const StatsPanel = ({
         </div>
       </div>
 
-      {/* CLICKABLE STAT CARDS */}
+      {/* Status Overview Grid */}
       <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-[12px] ml-[4px]">Status Overview</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-[12px] md:gap-[16px]">
         {[

@@ -46,7 +46,7 @@ const HeroSection = () => {
           Transforming raw NOTAMs into actionable operational briefings with advanced AI.
         </p>
 
-        {/* Search Box - 2️⃣ CTA SECTION FIX */}
+        {/* Search Box */}
         <div className="hero-search-box flex flex-col md:flex-row w-full max-w-3xl mx-auto gap-3 md:gap-0 bg-slate-800/60 backdrop-blur-xl md:rounded-2xl rounded-xl p-3 md:p-2 border border-blue-500/30 shadow-2xl transition-all focus-within:border-blue-500 focus-within:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)]">
           <div className="relative w-full flex items-center bg-slate-900/50 md:bg-transparent rounded-xl md:rounded-none">
               <i className="fa-solid fa-magnifying-glass absolute left-[24px] text-slate-400 text-[20px]"></i>
@@ -85,7 +85,7 @@ const HeroSection = () => {
             </div>
         </div>
 
-        {/* --- SAFETY FOOTER --- */}
+        {/* Safety Footer */}
         <div className="hero-footer flex flex-col items-center gap-4 mt-12 md:mt-20 pt-8 border-t border-slate-700/50 w-full max-w-2xl px-4">
             <div className="disclaimer-badge flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase">
                 <i className="fa-solid fa-triangle-exclamation"></i>

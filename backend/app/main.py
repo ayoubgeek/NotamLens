@@ -12,9 +12,6 @@ app = FastAPI(
 )
 
 # --- Security & Middleware ---
-# CORS is annoying but necessary.
-# In dev, we allow everything ("*"). 
-# TODO: Before deploying to Prod, restrict 'allow_origins' to the specific frontend domain.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -30,8 +27,7 @@ app.add_middleware(
 )
 
 # --- Health Check ---
-# AWS/Docker needs this to know if the container is alive.
-# Keep it lightweight (no DB calls) so load balancers don't kill the pod falsely.
+# Keep response lightweight to prevent false positives from load balancers.
 @app.get("/health")
 async def health_check():
     return {
@@ -41,12 +37,9 @@ async def health_check():
     }
 
 # --- Router Registration ---
-# This connects our "Brain" (Search/Analyze) to the web server.
-# Without this line, the app is just an empty shell.
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
-    # Local dev entry point. 
-    # 'reload=True' is essential for DX (Developer Experience) so we don't restart on every save.
+    # Local development entry point.
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -85,7 +85,6 @@ export const reconstructRawICAO = (n) => {
 
 // --- STATS ENGINE (UPDATED) ---
 export const calculateStats = (data) => {
-  // Added 'obstacles' to the stats object
   let s = { closed: 0, unserviceable: 0, restricted: 0, wip: 0, obstacles: 0 };
   let c = { runways: 0, taxiways: 0, aprons: 0, lighting: 0, nav: 0, other: 0 };
   
@@ -95,28 +94,18 @@ export const calculateStats = (data) => {
     const condition = qCode.substring(3, 5); // e.g., LC
     
     // --- STATUS COUNTERS ---
-    
-    // CLOSED: LC (Closed), CC (Closed)
     if (condition === 'LC' || condition === 'CC') {
         s.closed++;
     }
-    
-    // UNSERVICEABLE: AS (Unserviceable), AU (Not Available)
     else if (condition === 'AS' || condition === 'AU') {
         s.unserviceable++;
     }
-    
-    // RESTRICTED: RT, RP, RR
     else if (condition === 'RT' || condition === 'RP' || condition === 'RR') {
         s.restricted++;
     }
-    
-    // WIP: EW (Work), WZ (Work Zone), MA (Maintenance), HW (Work in Progress - FIX ADDED HERE)
     else if (condition === 'EW' || condition === 'WZ' || condition === 'MA' || condition === 'HW') {
         s.wip++;
     }
-    
-    // OBSTACLES: Subject is OB (Obstacle), or Condition is CT (Caution), OB (Obstacle)
     else if (subject === 'OB' || condition === 'OB' || condition === 'CT') {
         s.obstacles++;
     }

@@ -7,27 +7,20 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "NotamLens"
     API_V1_STR: str = "/api/v1"
     
-    # Debug Toggle
-    # Note: Keep False in production. Leaking stack traces to users is a security risk.
+    # Security: Must be False in production
     DEBUG_MODE: bool = False
     
-    # Secret
-    # If this is missing from .env, Pydantic will throw a validation error at startup.
-    # Better to crash now than fail silently later when a user tries to run a query.
+    # Required secrets. Fails fast on startup if missing.
     GEMINI_API_KEY: str | None = None
     GROQ_API_KEY: str | None = None
     
-    # Infrastructure
-    # Defaulting to local Redis. If we deploy to AWS, override this env var.
+    # Infrastructure dependencies
     REDIS_URL: str = "redis://localhost:6379/0"
     
-    # Cache Policy
-    # 600s (10 mins) seems like the sweet spot.
-    # Too short = higher scraping costs. Too long = pilots might miss critical updates.
-    REDIS_TTL: int = 600  
+    # Cache TTL in seconds (Tradeoff: Performance vs Data Staleness)
+    REDIS_TTL: int = 600
 
-    # Config Loader
-    # "ignore" extra fields prevents crashes if we have stale keys in the local .env file.
+    # Allows extra unenforced variables in local environment files
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -37,8 +30,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    # Optimization: Reading os.environ is fast, but reading .env from disk is slow.
-    # We cache this object so we only hit the filesystem once (on startup).
+    # Cache configuration parsing to optimize startup/initialization.
     return Settings()
 
 settings = get_settings()

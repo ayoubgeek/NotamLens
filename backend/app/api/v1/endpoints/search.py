@@ -11,38 +11,28 @@ async def search_notams(
     icao: str = Path(..., min_length=4, max_length=4, description="4-letter ICAO code (e.g., KJFK)")
 ):
     """
-    Primary endpoint for fetching raw NOTAMs.
-    Flow: User Request -> Validation -> Scraper -> Clean Data -> JSON Response.
+    Primary endpoint for fetching raw NOTAMs via FAA integration.
     """
-    # 1. Validation (The Bouncer)
-    # Even though Pydantic validates the path param, we double-check logic here.
     clean_icao = icao.upper().strip()
     if not clean_icao.isalpha():
-        # Prevent injection attacks or garbage input like '1234'.
         raise InvalidAirportCode(clean_icao)
 
-    # 2. Execution (The Work)
-    # We initialize the scraper here. 
-    # In a high-scale app, we might inject this as a dependency to reuse connections.
+    # Scraper instance is currently created per-request.
+    # Consider connection pooling or dependency injection for scaling.
     scraper = FaaScraper()
     
     try:
-        # We assume the scrape might take 1-3 seconds.
-        # Since 'requests' is blocking, this actually pauses this specific worker thread.
-        # Future optimization: Refactor FaaScraper to use 'aiohttp' for true async.
+        # Synchronous blocking call to FAA; consider aiohttp for high throughput.
         results = scraper.fetch_notams(clean_icao)
         
         if not results:
-            # Valid search, but empty result. 
-            # We return an empty list instead of a 404 because "No NOTAMs" is a valid state (Safe Airport).
+            # Empty result implies no active NOTAMs, a valid operational state.
             return []
             
         return results
 
     except FaaScraperException:
-        # The service layer failed (FAA down?). We bubble up the specific error code.
         raise
     except Exception as e:
-        # Catch-all for unexpected crashes (e.g., memory overflow).
         print(f"CRITICAL: Unhandled error in search endpoint: {e}")
         raise HTTPException(status_code=500, detail="Internal System Malfunction")

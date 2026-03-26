@@ -8,7 +8,4 @@ class AIAnalysisResult(BaseModel):
     risk_score: int
     risk_level: Optional[str] = "LOW"
     
-    # ---------------------------------------------------------
-    # IMPORTANT: The 'reasoning' field is DELETED.
-    # If you see "reasoning: str" here, DELETE IT IMMEDIATELY.
-    # ---------------------------------------------------------
+    # Note: 'reasoning' field intentionally omitted per API contract.
