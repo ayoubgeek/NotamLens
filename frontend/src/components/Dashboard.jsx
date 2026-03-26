@@ -10,32 +10,23 @@ function Dashboard() {
   const { icao } = useParams();
   const navigate = useNavigate();
 
-  // --- STATE ---
+  // state...
   const [notams, setNotams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  // Analytics State
   const [aiInsights, setAiInsights] = useState({}); 
   const [analyzingIds, setAnalyzingIds] = useState({});
-  // Updated Stats State: includes 'obstacles' to match formatters.js
   const [stats, setStats] = useState({ closed: 0, unserviceable: 0, restricted: 0, wip: 0, obstacles: 0 });
   const [categories, setCategories] = useState({ runways: 0, taxiways: 0, aprons: 0, lighting: 0, nav: 0, other: 0 });
-  
-  // --- FILTER STATE ---
   const [priorityFilter, setPriorityFilter] = useState('ALL'); 
   const [statusFilter, setStatusFilter] = useState('ALL');     
   const [categoryFilter, setCategoryFilter] = useState('ALL'); 
-  
-  // UI State
   const [activeMaps, setActiveMaps] = useState({});
   const [activeRaw, setActiveRaw] = useState({}); 
-  
-  // Database State
   const [airportDatabase, setAirportDatabase] = useState(AIRPORT_CONFIG.firs); 
   const [airportName, setAirportName] = useState('');
 
-  // --- EFFECT 1: Load Airport Names ---
+  // effects...
   useEffect(() => {
     const fetchAirportData = async () => {
       try {
@@ -57,14 +48,12 @@ function Dashboard() {
     fetchAirportData();
   }, []);
 
-  // --- EFFECT 2: Auto-Fetch Data ---
   useEffect(() => {
     if (icao && Object.keys(airportDatabase).length > 0) {
         fetchData(icao);
     }
   }, [icao, airportDatabase]);
 
-  // --- DATA FETCHING ---
   const fetchData = async (code) => {
     const searchCode = code.toUpperCase();
     const foundName = airportDatabase[searchCode] || searchCode;
@@ -104,123 +93,91 @@ function Dashboard() {
     }
   };
 
-  // --- UI TOGGLES ---
   const toggleMap = (id) => setActiveMaps(prev => ({ ...prev, [id]: !prev[id] }));
   const toggleRaw = (id) => setActiveRaw(prev => ({ ...prev, [id]: !prev[id] }));
 
-  // --- ADVANCED FILTERING LOGIC (STRICT Q-CODE) ---
   const filteredNotams = notams.filter(n => {
-    // 1. Prepare Q-Code Parts
     const qCode = (n.q_data?.code || "QXXXX").toUpperCase();
-    const subject = qCode.substring(1, 3);   // e.g., MR
-    const condition = qCode.substring(3, 5); // e.g., LC
-    
+    const subject = qCode.substring(1, 3);
+    const condition = qCode.substring(3, 5);
     const p = getPriority(n);
-
-    // 2. Priority Filter
     if (priorityFilter === 'CRITICAL' && p !== 3) return false;
     if (priorityFilter === 'WARNING' && p < 2) return false;
-
-    // 3. Status Filter (Matches formatters.js Logic)
     if (statusFilter !== 'ALL') {
-        if (statusFilter === 'CLOSED') {
-            // LC = Closed, CC = Closed
-            if (condition !== 'LC' && condition !== 'CC') return false;
-        }
-        else if (statusFilter === 'UNSERVICEABLE') {
-            // AS = Unserviceable, AU = Not Available
-            if (condition !== 'AS' && condition !== 'AU') return false;
-        }
-        else if (statusFilter === 'RESTRICTED') {
-            // RT = Restricted, RP = Prohibited, RR = Reserved
-            if (condition !== 'RT' && condition !== 'RP' && condition !== 'RR') return false;
-        }
-        else if (statusFilter === 'WIP') {
-            // EW = Work, WZ = Work Zone, MA = Maintenance, HW = Work in Progress (Added HW)
-            if (condition !== 'EW' && condition !== 'WZ' && condition !== 'MA' && condition !== 'HW') return false;
-        }
-        else if (statusFilter === 'OBSTACLES') {
-            // Subject OB, or Condition OB/CT
-            if (subject !== 'OB' && condition !== 'OB' && condition !== 'CT') return false;
-        }
+        if (statusFilter === 'CLOSED') { if (condition !== 'LC' && condition !== 'CC') return false; }
+        else if (statusFilter === 'UNSERVICEABLE') { if (condition !== 'AS' && condition !== 'AU') return false; }
+        else if (statusFilter === 'RESTRICTED') { if (condition !== 'RT' && condition !== 'RP' && condition !== 'RR') return false; }
+        else if (statusFilter === 'WIP') { if (condition !== 'EW' && condition !== 'WZ' && condition !== 'MA' && condition !== 'HW') return false; }
+        else if (statusFilter === 'OBSTACLES') { if (subject !== 'OB' && condition !== 'OB' && condition !== 'CT') return false; }
     }
-
-    // 4. Category Filter (Matches formatters.js Logic)
     if (categoryFilter !== 'ALL') {
-        if (categoryFilter === 'RUNWAYS') {
-            // MR = Runway, RW = Runway
-            if (subject !== 'MR' && subject !== 'RW') return false;
-        }
-        else if (categoryFilter === 'TAXIWAYS') {
-            // MX = Taxiway, TW = Taxiway
-            if (subject !== 'MX' && subject !== 'TW') return false;
-        }
-        else if (categoryFilter === 'APRONS') {
-            // MN = Apron, MK = Parking, MP = Parking
-            if (subject !== 'MN' && subject !== 'MK' && subject !== 'MP') return false;
-        }
-        else if (categoryFilter === 'LIGHTING') {
-            // Subject starts with L (LA, LB, etc.)
-            if (!subject.startsWith('L')) return false;
-        }
-        else if (categoryFilter === 'NAVAIDS') {
-            // Subject starts with N (Nav) or I (ILS)
-            if (!subject.startsWith('N') && !subject.startsWith('I')) return false;
-        }
+        if (categoryFilter === 'RUNWAYS') { if (subject !== 'MR' && subject !== 'RW') return false; }
+        else if (categoryFilter === 'TAXIWAYS') { if (subject !== 'MX' && subject !== 'TW') return false; }
+        else if (categoryFilter === 'APRONS') { if (subject !== 'MN' && subject !== 'MK' && subject !== 'MP') return false; }
+        else if (categoryFilter === 'LIGHTING') { if (!subject.startsWith('L')) return false; }
+        else if (categoryFilter === 'NAVAIDS') { if (!subject.startsWith('N') && !subject.startsWith('I')) return false; }
     }
-
     return true;
   });
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-nav">
-          <button onClick={() => navigate('/')} className="back-btn">
-            <i className="fa-solid fa-arrow-left"></i> NEW SEARCH
+    <div className="dashboard-container min-h-[100dvh] bg-slate-900 w-full overflow-x-hidden flex flex-col">
+      {/* Navigation */}
+      <div className="dashboard-nav w-full bg-slate-900 border-b border-slate-800 p-4 md:px-6 lg:px-8 flex items-center justify-between z-50 sticky top-0 shadow-md">
+          <button onClick={() => navigate('/')} className="back-btn flex items-center justify-center gap-2 text-xs md:text-sm font-mono font-bold text-slate-400 hover:text-white px-4 min-h-[44px] rounded-lg border border-slate-700 hover:border-blue-500 bg-slate-800/50 hover:bg-blue-500/10 transition-colors">
+            <i className="fa-solid fa-arrow-left"></i> <span className="hidden md:inline">NEW SEARCH</span><span className="md:hidden">BACK</span>
           </button>
-          <div className="nav-title">COMMANDER'S BRIEF // {icao}</div>
+          <div className="nav-title font-mono font-bold text-white text-xs md:text-sm lg:text-base tracking-widest truncate ml-4 w-full text-right md:text-left">
+            COMMANDER'S BRIEF // <span className="text-blue-400">{icao}</span>
+          </div>
       </div>
 
-      <div className="main-content">
+      <div className="main-content w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 flex flex-col flex-1">
         {loading && (
-            <div className="loading-state">
-                <i className="fa-solid fa-satellite-dish fa-spin"></i>
-                <p>ESTABLISHING DATALINK WITH {icao}...</p>
+            <div className="loading-state flex flex-col items-center justify-center p-12 text-slate-400 text-center w-full min-h-[300px] border border-slate-800 rounded-2xl bg-slate-800/30">
+                <i className="fa-solid fa-satellite-dish fa-spin text-4xl mb-4 text-blue-500"></i>
+                <p className="font-mono font-bold tracking-widest text-sm">ESTABLISHING DATALINK WITH {icao}...</p>
             </div>
         )}
         
-        {error && <div className="error-banner"><i className="fa-solid fa-triangle-exclamation"></i> {error}</div>}
+        {error && (
+            <div className="error-banner flex items-center gap-3 bg-red-500/10 border border-red-500/30 text-red-500 p-4 md:p-6 rounded-xl font-bold text-sm md:text-base tracking-wide w-full shadow-lg">
+                <i className="fa-solid fa-triangle-exclamation text-2xl flex-shrink-0"></i> 
+                <span>{error}</span>
+            </div>
+        )}
 
         {!loading && !error && (
-          <>
+          <div className="w-full flex flex-col gap-6 md:gap-8">
             <StatsPanel 
                 airport={icao}
                 airportName={airportName}
                 notamsCount={notams.length}
                 stats={stats}
                 categories={categories}
-                
-                // Priority State
                 priorityFilter={priorityFilter}
                 setPriorityFilter={setPriorityFilter}
-                
-                // New Filters State
                 statusFilter={statusFilter}
                 setStatusFilter={setStatusFilter}
                 categoryFilter={categoryFilter}
                 setCategoryFilter={setCategoryFilter}
             />
 
-            <div className="results">
+            <div className="results w-full flex flex-col items-center justify-center gap-4">
             {/* --- UPDATED NO RESULTS DESIGN --- */}
             {filteredNotams.length === 0 && (
-                <div className="empty-state-card fade-in">
-                    <div className="empty-icon-wrapper">
-                        <i className="fa-solid fa-filter-circle-xmark"></i>
+                <div className="empty-state-card flex flex-col items-center justify-center text-center p-8 md:p-12 lg:p-16 bg-gradient-to-b from-slate-800/60 to-slate-900/80 border border-slate-700/50 rounded-2xl shadow-xl w-full animate-[fadeInUp_0.3s_ease-out]">
+                    <div className="empty-icon-wrapper text-5xl md:text-6xl text-slate-600 mb-6 drop-shadow-md">
+                        <i className="fa-solid fa-filter-circle-xmark bg-clip-text text-transparent bg-gradient-to-tr from-slate-500 to-slate-400"></i>
                     </div>
-                    <h3>NO NOTAMS MATCH FILTERS</h3>
-                    <p>Your current filter selections returned no results for this airport.</p>
-                    <small>Try selecting different categories or click "ALL" to reset.</small>
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-2 tracking-wide">NO NOTAMS MATCH FILTERS</h3>
+                    <p className="text-slate-400 text-sm md:text-base max-w-md leading-relaxed mb-6">Your current filter selections returned no results for this airport.</p>
+                    <button 
+                        className="px-6 py-3 min-h-[48px] bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl tracking-wider uppercase shadow-lg transition-transform hover:-translate-y-0.5" 
+                        onClick={() => { setStatusFilter('ALL'); setCategoryFilter('ALL'); setPriorityFilter('ALL'); }}
+                    >
+                        RESET ALL FILTERS
+                    </button>
                 </div>
             )}
             
@@ -239,7 +196,7 @@ function Dashboard() {
                 />
             ))}
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

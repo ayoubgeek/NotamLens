@@ -6,25 +6,21 @@ const StatsPanel = ({
     notamsCount, 
     stats, 
     categories, 
-    // Priority Props
     priorityFilter, 
     setPriorityFilter,
-    // Status Filter Props
     statusFilter,
     setStatusFilter,
-    // Category Filter Props
     categoryFilter,
     setCategoryFilter
 }) => {
   if (!airport) return null;
 
-  // Toggle Logic: If clicking the same filter again, turn it off (set to ALL)
   const handleStatusClick = (status) => {
     if (statusFilter === status) {
         setStatusFilter('ALL');
     } else {
         setStatusFilter(status);
-        setCategoryFilter('ALL'); // Reset category to avoid conflicts
+        setCategoryFilter('ALL'); 
     }
   };
 
@@ -33,133 +29,82 @@ const StatsPanel = ({
         setCategoryFilter('ALL');
     } else {
         setCategoryFilter(category);
-        setStatusFilter('ALL'); // Reset status to avoid conflicts
+        setStatusFilter('ALL'); 
     }
   };
 
-  // --- MASTER RESET FUNCTION ---
   const handleResetAll = () => {
     setPriorityFilter('ALL');
     setStatusFilter('ALL');
     setCategoryFilter('ALL');
   };
 
-  // Check if any filter is currently active
   const isAnyFilterActive = statusFilter !== 'ALL' || categoryFilter !== 'ALL' || priorityFilter !== 'ALL';
 
   return (
-    <div className="dashboard-section fade-in">
-      <div className="airport-header-card">
-        <div className="airport-title-row">
-          <h2>{airportName || airport} Briefing</h2>
-          <div className="airport-tags">
-            <span className="meta-tag">ICAO: {airport}</span>
-            <span className="meta-tag">ACTIVE NOTAMS: {notamsCount}</span>
+    <div className="dashboard-section w-full mb-8 space-y-4 md:space-y-6 animate-[fadeInUp_0.4s_ease-out]">
+      {/* Header Card */}
+      <div className="airport-header-card bg-gradient-to-br from-blue-600 to-blue-900 rounded-2xl p-5 md:p-6 lg:p-8 text-white shadow-xl w-full">
+        <div className="airport-title-row flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight">{airportName || airport} Briefing</h2>
+          <div className="airport-tags flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
+            <span className="meta-tag bg-white/20 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold tracking-wide">ICAO: {airport}</span>
+            <span className="meta-tag bg-white/20 px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold tracking-wide">ACTIVE NOTAMS: {notamsCount}</span>
           </div>
         </div>
-        <p className="airport-desc">
+        <p className="airport-desc text-blue-100 text-sm md:text-base leading-relaxed max-w-3xl">
           Current operational status and critical notices for {airportName || airport}. Review all items before flight.
         </p>
       </div>
 
       {/* CLICKABLE STAT CARDS */}
-      <div className="stats-grid">
-        <div 
-            className={`stat-card red ${statusFilter === 'CLOSED' ? 'active-card' : ''}`}
-            onClick={() => handleStatusClick('CLOSED')}
-            style={{ cursor: 'pointer' }}
-        >
-            <div className="stat-icon"><i className="fa-solid fa-circle-xmark"></i></div>
-            <div className="stat-info"><span className="stat-value">{stats.closed}</span><span className="stat-label">CLOSED</span></div>
-        </div>
-        
-        <div 
-            className={`stat-card orange ${statusFilter === 'UNSERVICEABLE' ? 'active-card' : ''}`}
-            onClick={() => handleStatusClick('UNSERVICEABLE')}
-            style={{ cursor: 'pointer' }}
-        >
-            <div className="stat-icon"><i className="fa-solid fa-triangle-exclamation"></i></div>
-            <div className="stat-info"><span className="stat-value">{stats.unserviceable}</span><span className="stat-label">UNSERVICEABLE</span></div>
-        </div>
-        
-        <div 
-            className={`stat-card yellow ${statusFilter === 'RESTRICTED' ? 'active-card' : ''}`}
-            onClick={() => handleStatusClick('RESTRICTED')}
-            style={{ cursor: 'pointer' }}
-        >
-            <div className="stat-icon"><i className="fa-solid fa-ban"></i></div>
-            <div className="stat-info"><span className="stat-value">{stats.restricted}</span><span className="stat-label">RESTRICTED</span></div>
-        </div>
-        
-        <div 
-            className={`stat-card blue ${statusFilter === 'WIP' ? 'active-card' : ''}`}
-            onClick={() => handleStatusClick('WIP')}
-            style={{ cursor: 'pointer' }}
-        >
-            <div className="stat-icon"><i className="fa-solid fa-hammer"></i></div>
-            <div className="stat-info"><span className="stat-value">{stats.wip}</span><span className="stat-label">WORK IN PROG</span></div>
-        </div>
-
-        {/* --- NEW OBSTACLES CARD --- */}
-        <div 
-            className={`stat-card purple ${statusFilter === 'OBSTACLES' ? 'active-card' : ''}`}
-            onClick={() => handleStatusClick('OBSTACLES')}
-            style={{ cursor: 'pointer' }}
-        >
-            <div className="stat-icon"><i className="fa-solid fa-mountain-sun"></i></div>
-            <div className="stat-info"><span className="stat-value">{stats.obstacles}</span><span className="stat-label">OBSTACLES</span></div>
-        </div>
+      <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        {[
+          { id: 'CLOSED', icon: 'fa-circle-xmark', label: 'CLOSED', val: stats.closed, colorClass: 'border-l-4 border-red-500 text-red-500' },
+          { id: 'UNSERVICEABLE', icon: 'fa-triangle-exclamation', label: 'UNSERVICEABLE', val: stats.unserviceable, colorClass: 'border-l-4 border-orange-500 text-orange-500' },
+          { id: 'RESTRICTED', icon: 'fa-ban', label: 'RESTRICTED', val: stats.restricted, colorClass: 'border-l-4 border-yellow-400 text-yellow-400' },
+          { id: 'WIP', icon: 'fa-hammer', label: 'WORK IN PROG', val: stats.wip, colorClass: 'border-l-4 border-blue-500 text-blue-500' },
+          { id: 'OBSTACLES', icon: 'fa-mountain-sun', label: 'OBSTACLES', val: stats.obstacles, colorClass: 'border-l-4 border-purple-500 text-purple-400 bg-purple-500/5' }
+        ].map(stat => (
+            <div 
+                key={stat.id}
+                className={`stat-card flex items-center gap-4 bg-slate-800 border border-slate-700 p-4 rounded-xl transition-all transform hover:-translate-y-1 hover:shadow-lg cursor-pointer ${stat.colorClass} ${statusFilter === stat.id ? 'ring-2 ring-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : ''}`}
+                onClick={() => handleStatusClick(stat.id)}
+            >
+                <div className="stat-icon text-2xl opacity-90"><i className={`fa-solid ${stat.icon}`}></i></div>
+                <div className="stat-info flex flex-col">
+                    <span className="stat-value text-2xl font-black text-white leading-none">{stat.val}</span>
+                    <span className="stat-label text-[10px] md:text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">{stat.label}</span>
+                </div>
+            </div>
+        ))}
       </div>
 
       {/* CATEGORY BAR WITH MASTER RESET BUTTON */}
-      <div className="category-bar">
-        <button 
-            className={`cat-pill ${categoryFilter === 'RUNWAYS' ? 'active-pill' : ''}`} 
-            onClick={() => handleCategoryClick('RUNWAYS')}
-        >
-            Runways <span className="count">{categories.runways}</span>
-        </button>
+      <div className="category-bar flex flex-col md:flex-row flex-wrap items-start md:items-center gap-3 bg-slate-800/80 p-3 md:p-4 rounded-xl border border-slate-700 w-full">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            {Object.entries({ RUNWAYS: [categories.runways, 'Runways'], TAXIWAYS: [categories.taxiways, 'Taxiways'], APRONS: [categories.aprons, 'Aprons'], LIGHTING: [categories.lighting, 'Lighting'], NAVAIDS: [categories.nav, 'Nav Aids'] }).map(([key, [count, label]]) => (
+                <button 
+                    key={key}
+                    className={`cat-pill flex items-center gap-2 px-3 md:px-4 py-2 min-h-[44px] rounded-lg text-xs md:text-sm font-semibold transition-colors border ${categoryFilter === key ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]' : 'bg-slate-700/50 border-white/10 text-slate-300 hover:bg-white/10'}`}
+                    onClick={() => handleCategoryClick(key)}
+                >
+                    {label} <span className="count bg-black/30 px-2 py-0.5 rounded text-[10px] md:text-xs">{count}</span>
+                </button>
+            ))}
+        </div>
 
-        <button 
-            className={`cat-pill ${categoryFilter === 'TAXIWAYS' ? 'active-pill' : ''}`}
-            onClick={() => handleCategoryClick('TAXIWAYS')}
-        >
-            Taxiways <span className="count">{categories.taxiways}</span>
-        </button>
-
-        <button 
-            className={`cat-pill ${categoryFilter === 'APRONS' ? 'active-pill' : ''}`}
-            onClick={() => handleCategoryClick('APRONS')}
-        >
-            Aprons <span className="count">{categories.aprons}</span>
-        </button>
-
-        <button 
-            className={`cat-pill ${categoryFilter === 'LIGHTING' ? 'active-pill' : ''}`}
-            onClick={() => handleCategoryClick('LIGHTING')}
-        >
-            Lighting <span className="count">{categories.lighting}</span>
-        </button>
-
-        <button 
-            className={`cat-pill ${categoryFilter === 'NAVAIDS' ? 'active-pill' : ''}`}
-            onClick={() => handleCategoryClick('NAVAIDS')}
-        >
-            Nav Aids <span className="count">{categories.nav}</span>
-        </button>
-
-        <div className="filter-group-right">
+        <div className="filter-group-right flex flex-row gap-2 w-full md:w-auto md:ml-auto mt-2 md:mt-0">
             {/* MASTER RESET BUTTON */}
             <button 
-                className={`filter-btn ${!isAnyFilterActive ? 'active' : ''}`} 
+                className={`filter-btn flex-1 md:flex-none flex items-center justify-center px-4 py-2 min-h-[44px] rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${!isAnyFilterActive ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`} 
                 onClick={handleResetAll}
-                title="Reset all filters"
             >
                 ALL
             </button>
 
             <button 
-                className={`filter-btn crit ${priorityFilter === 'CRITICAL' ? 'active' : ''}`} 
+                className={`filter-btn flex-1 md:flex-none flex items-center justify-center px-4 py-2 min-h-[44px] rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${priorityFilter === 'CRITICAL' ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`} 
                 onClick={() => setPriorityFilter(priorityFilter === 'CRITICAL' ? 'ALL' : 'CRITICAL')}
             >
                 CRITICAL
