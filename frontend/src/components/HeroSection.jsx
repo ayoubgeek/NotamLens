@@ -49,10 +49,10 @@ const HeroSection = () => {
         {/* Search Box - 2️⃣ CTA SECTION FIX */}
         <div className="hero-search-box flex flex-col md:flex-row w-full max-w-3xl mx-auto gap-3 md:gap-0 bg-slate-800/60 backdrop-blur-xl md:rounded-2xl rounded-xl p-3 md:p-2 border border-blue-500/30 shadow-2xl transition-all focus-within:border-blue-500 focus-within:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)]">
           <div className="relative w-full flex items-center bg-slate-900/50 md:bg-transparent rounded-xl md:rounded-none">
-              <i className="fa-solid fa-magnifying-glass search-icon absolute left-5 text-slate-400 text-lg"></i>
+              <i className="fa-solid fa-magnifying-glass absolute left-[24px] text-slate-400 text-[20px]"></i>
               <input
                 type="text"
-                className="w-full bg-transparent text-white text-lg md:text-xl font-semibold pl-14 pr-4 py-4 md:py-5 min-h-[56px] outline-none placeholder:text-slate-500"
+                className="w-full bg-transparent text-white text-lg md:text-xl font-semibold pl-[64px] pr-4 py-4 md:py-5 min-h-[56px] outline-none placeholder:text-slate-500"
                 placeholder="Enter ICAO (e.g., EDDF)..."
                 value={icao}
                 onChange={(e) => setIcao(e.target.value.toUpperCase())}
