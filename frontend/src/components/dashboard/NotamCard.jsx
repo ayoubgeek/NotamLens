@@ -26,20 +26,25 @@ function MapAutoFit({ center }) {
 const CollapsibleText = ({ text }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     if (!text) return null;
-    if (text.length < 250) return <div className="message-body text-sm md:text-base font-mono text-slate-200 leading-relaxed bg-slate-900/40 p-4 rounded-xl border border-slate-700/50 break-words w-full">{text}</div>;
+    const isLong = text.length > 200;
+    const displayText = isExpanded || !isLong ? text : text.substring(0, 200) + "...";
 
     return (
-        <div className="message-body text-sm md:text-base font-mono text-slate-200 leading-relaxed bg-slate-900/40 p-4 rounded-xl border border-slate-700/50 break-words w-full">
-            {isExpanded ? text : text.substring(0, 250) + "..."}
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(!isExpanded);
-                }}
-                className="read-more-link flex justify-center items-center gap-2 text-blue-400 hover:text-blue-300 font-bold text-xs md:text-sm mt-3 pt-3 border-t border-slate-700/50 w-full min-h-[44px] transition-colors"
-            >
-                {isExpanded ? <><i className="fa-solid fa-chevron-up"></i> [ COLLAPSE ]</> : <><i className="fa-solid fa-chevron-down"></i> [ READ FULL TEXT ]</>}
-            </button>
+        <div className="w-full">
+            <div className="font-mono text-[14px] md:text-[15px] leading-[1.6] text-slate-200 bg-slate-900/40 p-[16px] rounded-[12px] border border-slate-700/50 break-words w-full shadow-inner">
+                {displayText}
+            </div>
+            {isLong && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className="flex justify-center items-center gap-2 text-blue-400 hover:text-blue-300 font-bold text-[13px] md:text-[14px] mt-2 w-full min-h-[44px] transition-colors hover:bg-slate-800/60 rounded-[8px] outline-none focus:ring-2 focus:ring-blue-500/50"
+                >
+                    {isExpanded ? <><i className="fa-solid fa-chevron-up"></i> COLLAPSE</> : <><i className="fa-solid fa-chevron-down"></i> READ FULL TEXT</>}
+                </button>
+            )}
         </div>
     );
 };
@@ -59,62 +64,89 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
         return '#10b981';
     };
 
+    // --- CHIP STYLES ---
+    const chipBase = "flex items-center justify-center gap-2 px-[12px] py-[6px] rounded-[6px] text-[13px] md:text-[14px] font-mono font-medium border min-h-[36px] w-[100%] min-[480px]:w-auto text-left min-[480px]:text-center transition-colors";
+    
+    // Q-Code Semantic Coloring
+    const condition = notam.q_data?.code?.substring(3, 5)?.toUpperCase() || '';
+    let qColor = 'bg-slate-900 border-slate-700 text-slate-300'; // Default Neutral
+    if (['LC', 'CC'].includes(condition)) qColor = 'bg-red-500/15 border-red-500/30 text-red-400';
+    else if (['AS', 'AU'].includes(condition)) qColor = 'bg-amber-500/15 border-amber-500/30 text-amber-400';
+    else if (['RT', 'RP', 'RR'].includes(condition)) qColor = 'bg-orange-500/15 border-orange-500/30 text-orange-400';
+    else if (['EW', 'WZ', 'MA', 'HW'].includes(condition)) qColor = 'bg-blue-500/15 border-blue-500/30 text-blue-400';
+
     return (
-        <div className="notam-card relative p-4 md:p-6 flex flex-col space-y-3 md:space-y-4 bg-slate-800/90 rounded-2xl shadow-lg border border-slate-700 transition-transform w-full overflow-hidden mb-6" style={{ borderLeft: `5px solid ${riskColor}` }}>
+        <div className="relative p-[16px] flex flex-col bg-slate-800 rounded-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-slate-700 transition-transform w-full overflow-hidden mb-[16px] md:mb-[20px] focus-within:border-slate-500 group" style={{ borderLeft: `3px solid ${riskColor}` }}>
             
-            {/* [Header] */}
-            <div className="card-header flex flex-col md:flex-row md:items-center justify-between gap-3 w-full border-b border-slate-700/50 pb-3">
-                <div className="header-left flex items-start md:items-center gap-2 md:gap-3 w-full md:w-auto">
-                    {priority === 3 && <i className="fa-solid fa-triangle-exclamation text-red-500 text-lg md:text-xl mt-1 md:mt-0"></i>}
-                    <span className="notam-id font-mono font-black text-lg md:text-xl lg:text-2xl break-all" style={{ color: riskColor }}>{notam.notam_id}</span>
+            {/* [HEADER] */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[12px] w-full pb-[12px] md:pb-[16px] mb-[12px] md:mb-[16px]">
+                <div className="flex items-center gap-[12px] w-full md:w-auto">
+                    {priority === 3 && <i className="fa-solid fa-triangle-exclamation text-red-500 text-[18px]"></i>}
+                    <span className="font-bold text-[18px] md:text-[20px] font-mono break-all text-white">{notam.notam_id}</span>
+                    <span className="flex-shrink-0 px-[12px] py-[4px] bg-slate-700/60 text-slate-300 text-[12px] font-bold rounded-full border border-slate-600 uppercase tracking-widest ml-auto sm:ml-0">
+                        {priority === 3 ? "CRITICAL" : "NOTICE"}
+                    </span>
                 </div>
-                <span className="priority-badge w-fit px-3 py-1 bg-slate-700/80 text-slate-300 text-[10px] md:text-xs font-black rounded border border-slate-600 uppercase tracking-widest align-self-start">
-                    {priority === 3 ? "CRITICAL" : "NOTICE"}
-                </span>
+                
+                {/* Desktop View Raw Button */}
+                <button 
+                    className={`hidden md:flex items-center justify-center gap-2 px-[16px] py-[8px] min-h-[40px] text-[13px] font-bold rounded-[8px] transition-colors border outline-none focus:ring-2 focus:ring-blue-500/50
+                    ${isRawOpen ? 'bg-slate-700 text-white border-slate-500 shadow-inner' : 'bg-transparent text-slate-400 border-slate-600 hover:text-white hover:border-slate-400 hover:bg-slate-700/50'}`} 
+                    onClick={() => toggleRaw(notam.notam_id)}
+                >
+                    <i className={`fa-solid ${isRawOpen ? 'fa-eye-slash' : 'fa-code'} opacity-80`}></i> {isRawOpen ? 'HIDE RAW NOTAM' : 'VIEW RAW NOTAM'}
+                </button>
             </div>
 
-            {/* [Meta] Q-Code Pills */}
+            {/* [META] Chips */}
             {notam.q_data && (
-                <div className="q-bar-container flex flex-wrap gap-2 items-center w-full">
-                    <div className="q-pill blue flex items-center justify-center gap-2 px-3 py-1.5 bg-blue-500/15 text-blue-400 border border-blue-500/20 rounded-lg text-xs md:text-sm font-mono font-semibold min-h-[36px]">
-                        <i className="fa-solid fa-map-pin opacity-70"></i> {notam.q_data.fir}
+                <div className="flex flex-wrap gap-[8px] w-full mb-[16px] md:mb-[20px]">
+                    {/* FIR */}
+                    <div className={`${chipBase} bg-blue-500/15 text-blue-300 border-blue-500/30`}>
+                        <i className="fa-solid fa-map-pin opacity-70"></i> <span>{notam.q_data.fir}</span>
                     </div>
-                    <div className="q-pill dark flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-900/60 border border-slate-700 text-slate-300 rounded-lg text-xs md:text-sm font-mono font-medium min-h-[36px]">
-                        <i className="fa-solid fa-ruler-vertical text-slate-500"></i>
+
+                    {/* FL */}
+                    <div className={`${chipBase} bg-slate-900 border-slate-700 text-slate-300`}>
+                        <i className="fa-solid fa-arrows-up-down opacity-50"></i>
                         <span>FL{notam.q_data.lower || "000"} - FL{notam.q_data.upper || "999"}</span>
                     </div>
-                    <div className="q-pill dark flex items-center justify-center gap-2 px-3 py-1.5 bg-slate-900/60 border border-slate-700 text-slate-300 rounded-lg text-xs md:text-sm font-mono font-medium min-h-[36px]">
-                        <strong style={{ color: riskColor }}>{notam.q_data.code}</strong>
-                        <span className="opacity-70 truncate max-w-[200px]">{decodeQCode(notam.q_data.code)}</span>
-                    </div>
-                </div>
-            )}
 
-            {/* [Details] Coordinates & Radius */}
-            {notam.q_data && (
-                <div className="details-container flex flex-col md:flex-row md:items-center justify-between gap-3 w-full bg-slate-900/30 p-3 rounded-xl border border-slate-700/30">
-                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto text-xs md:text-sm font-mono text-slate-300">
-                        <div className="flex items-center gap-2 bg-black/20 px-2 py-1 rounded">
-                            <i className="fa-solid fa-crosshairs text-slate-500"></i> {notam.q_data.coords}
-                        </div>
-                        <div className="flex items-center gap-2 bg-black/20 px-2 py-1 rounded">
-                            <i className="fa-solid fa-circle-dot text-slate-500"></i> <strong className="text-yellow-400">{notam.q_data.radius} NM</strong>
-                        </div>
+                    {/* Q-Code */}
+                    <div className={`${chipBase} ${qColor}`}>
+                        <strong className="tracking-widest opacity-90">{notam.q_data.code}</strong>
+                        <span className="opacity-50 mx-1">•</span>
+                        <span className="truncate">{decodeQCode(notam.q_data.code)}</span>
                     </div>
-                    {mapCoords && (
-                        <button 
-                            className="locate-btn w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition-colors border border-blue-500 shadow-md" 
-                            onClick={() => toggleMap(notam.notam_id)}
-                        >
-                            <i className={`fa-solid ${isMapOpen ? 'fa-map-location-dot' : 'fa-location-dot'}`}></i> {isMapOpen ? 'CLOSE MAP' : 'LOCATE ON MAP'}
-                        </button>
-                    )}
+
+                    {/* Coordinates + Radius + Locate */}
+                    <div className={`${chipBase} bg-slate-900 border-slate-700 text-slate-300 !pr-[4px]`}>
+                        <div className="flex items-center gap-2">
+                            <i className="fa-solid fa-crosshairs opacity-50"></i>
+                            <span>{notam.q_data.coords}</span>
+                        </div>
+                        <span className="opacity-50 mx-1">•</span>
+                        <div className="flex items-center gap-1.5 mr-1">
+                            <i className="fa-regular fa-circle opacity-50 text-[10px]"></i>
+                            <span>{notam.q_data.radius} NM</span>
+                        </div>
+                        {mapCoords && (
+                            <button 
+                                className={`flex items-center justify-center min-w-[36px] min-h-[28px] rounded-[4px] ml-1 transition-colors outline-none focus:ring-2 focus:ring-blue-500 ${isMapOpen ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+                                onClick={() => toggleMap(notam.notam_id)}
+                                title="Toggle Map View"
+                                aria-label="Toggle Map View"
+                            >
+                                <i className="fa-solid fa-location-dot"></i>
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 
             {/* Map View */}
             {isMapOpen && mapCoords && (
-                <div className="map-box w-full h-[300px] md:h-[400px] lg:h-[450px] rounded-xl overflow-hidden border-2 border-slate-600 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] mt-2 animate-[fadeIn_0.3s_ease-out] z-10 bg-black">
+                <div className="w-full h-[300px] md:h-[400px] rounded-[12px] overflow-hidden border border-slate-600 shadow-inner mb-[16px] md:mb-[20px] bg-black">
                     <MapContainer center={mapCoords} zoom={11} style={{ height: '100%', width: '100%' }}>
                         <MapAutoFit center={mapCoords} />
                         <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
@@ -122,8 +154,8 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
                         <Circle center={mapCoords} radius={radiusMeters} pathOptions={{ color: riskColor, fillColor: riskColor, fillOpacity: 0.2 }} />
                         <Marker position={mapCoords} icon={customIcon}>
                             <Popup>
-                                <div className="popup-header font-bold px-3 py-2 bg-slate-100 text-slate-900 rounded-t-md border-b">NOTAM {notam.notam_id}</div>
-                                <div className="popup-body px-3 py-2 bg-white text-sm text-slate-800">
+                                <div className="font-bold px-[12px] py-[8px] bg-slate-100 text-slate-900 rounded-t-md border-b text-[13px]">NOTAM {notam.notam_id}</div>
+                                <div className="px-[12px] py-[8px] bg-white text-[13px] text-slate-800">
                                     <p className="m-0"><strong>Radius:</strong> <span className="font-mono">{notam.q_data?.radius} NM</span></p>
                                 </div>
                             </Popup>
@@ -133,46 +165,53 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
             )}
 
             {/* [Time] Dates */}
-            <div className="dates-row flex flex-col md:flex-row justify-between gap-4 md:gap-8 bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
-                <div className="date-col flex flex-col w-full">
-                    <label className="text-[10px] md:text-xs text-slate-400 font-bold mb-1.5 tracking-widest uppercase">EFFECTIVE FROM</label>
-                    <span className="font-mono font-medium text-white text-sm md:text-base bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700/30">{formatDate(notam.start_date)}</span>
+            <div className="flex flex-col md:flex-row bg-slate-900/80 rounded-[12px] border border-slate-700/50 mb-[16px] md:mb-[20px] overflow-hidden">
+                <div className="flex flex-col w-full p-[16px]">
+                    <label className="text-[11px] md:text-[12px] text-slate-400 font-bold mb-[4px] tracking-[0.5px] uppercase">EFFECTIVE FROM</label>
+                    <span className="font-mono font-semibold text-[15px] md:text-[16px] text-white tracking-tight">{formatDate(notam.start_date)}</span>
                 </div>
-                <div className="date-col flex flex-col w-full md:text-right">
-                    <label className="text-[10px] md:text-xs text-slate-400 font-bold mb-1.5 tracking-widest uppercase">VALID UNTIL</label>
-                    <span className="font-mono font-medium text-white text-sm md:text-base bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700/30">{formatDate(notam.end_date)}</span>
+                <div className="h-[1px] w-full bg-slate-700/50 md:hidden block"></div>
+                <div className="hidden md:block w-[1px] bg-slate-700/50"></div>
+                <div className="flex flex-col w-full p-[16px] bg-slate-800/20">
+                    <label className="text-[11px] md:text-[12px] text-slate-400 font-bold mb-[4px] tracking-[0.5px] uppercase">VALID UNTIL</label>
+                    <span className="font-mono font-semibold text-[15px] md:text-[16px] text-white tracking-tight">{formatDate(notam.end_date)}</span>
                 </div>
             </div>
 
-            {/* Message Body */}
-            <CollapsibleText text={notam.message || notam.raw_text} />
+            {/* [Body] Message */}
+            <div className="mb-[12px] md:mb-[16px]">
+              <CollapsibleText text={notam.message || notam.raw_text} />
+            </div>
             
-            {/* Raw View */}
+            {/* Raw View Terminal */}
             {isRawOpen && (
-                <div className="raw-terminal bg-[#0d1117] border border-[#30363d] border-l-4 border-l-yellow-400 p-4 rounded-xl shadow-inner overflow-x-auto animate-[fadeIn_0.3s_ease-out]">
-                    <pre className="font-mono text-slate-300 text-xs md:text-sm whitespace-pre-wrap break-words m-0">{reconstructRawICAO(notam)}</pre>
+                <div className="bg-[#0d1117] border border-[#30363d] border-l-[4px] border-l-slate-400 p-[16px] rounded-[12px] shadow-inner overflow-x-auto mb-[16px]">
+                    <pre className="font-mono text-slate-300 text-[13px] md:text-[14px] leading-[1.6] whitespace-pre-wrap break-all m-0">{reconstructRawICAO(notam)}</pre>
                 </div>
             )}
 
             {/* [Action] Primary Buttons */}
-            <div className="actions-container flex flex-col md:flex-row gap-3 w-full pt-4 border-t border-slate-700/50 mt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-[12px] w-full pt-[12px] mt-auto">
+                {/* Mobile View Raw Button */}
                 <button 
-                    className={`raw-toggle-btn w-full md:w-1/3 flex items-center justify-center gap-2 px-4 py-3 min-h-[48px] text-xs md:text-sm font-bold rounded-xl transition-colors border ${isRawOpen ? 'bg-slate-700 text-white border-slate-500' : 'bg-slate-800 text-slate-300 border-slate-600 hover:text-white hover:border-slate-400 hover:bg-slate-700/50'}`} 
+                    className={`md:hidden w-full flex items-center justify-center gap-2 px-[24px] py-[14px] min-h-[48px] text-[14px] font-bold rounded-[8px] transition-colors border hover:text-white focus:ring focus:ring-blue-500/50 outline-none
+                    ${isRawOpen ? 'bg-slate-700 text-white border-slate-500 shadow-inner' : 'bg-transparent text-slate-300 border-slate-600 hover:border-slate-400 hover:bg-slate-700/50'}`} 
                     onClick={() => toggleRaw(notam.notam_id)}
                 >
-                    <i className={`fa-solid ${isRawOpen ? 'fa-eye-slash' : 'fa-code'}`}></i> {isRawOpen ? 'HIDE RAW NOTAM' : 'VIEW RAW NOTAM'}
+                    <i className={`fa-solid ${isRawOpen ? 'fa-eye-slash' : 'fa-code'} opacity-80`}></i> {isRawOpen ? 'HIDE RAW' : 'VIEW RAW NOTAM'}
                 </button>
                 
+                {/* AI Brief Button */}
                 {!aiData ? (
                     <button 
-                        className="ai-btn w-full md:w-2/3 bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white border border-blue-400/50 flex items-center justify-center gap-2 px-4 py-3 min-h-[48px] rounded-xl text-xs md:text-sm font-bold tracking-wide shadow-lg transition-transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed" 
+                        className="w-full md:w-auto md:ml-auto bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/50 flex items-center justify-center gap-[10px] px-[24px] py-[14px] min-h-[48px] rounded-[8px] text-[14px] font-bold tracking-wide shadow-sm transition-all focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed" 
                         onClick={() => triggerAI(notam.notam_id, notam.raw_text)} 
                         disabled={isAnalyzing}
                     >
                         {isAnalyzing ? (
-                            <><i className="fa-solid fa-circle-notch fa-spin"></i> GENERATING BRIEF...</>
+                            <><i className="fa-solid fa-circle-notch fa-spin"></i> GENERATING...</>
                         ) : (
-                            <><i className="fa-solid fa-brain"></i> GENERATE COMMANDER'S BRIEF</>
+                            <><i className="fa-solid fa-robot"></i> COMMANDER'S BRIEF</>
                         )}
                     </button>
                 ) : null}
@@ -180,45 +219,45 @@ const NotamCard = ({ notam, priority, aiData, isAnalyzing, activeMaps, activeRaw
 
             {/* AI Results Section */}
             {aiData && (
-                <div className="ai-section mt-2 w-full animate-[fadeIn_0.4s_ease-out]">
-                    <div className="ai-box flex flex-col bg-slate-900 border border-slate-700 border-t-4 border-t-blue-500 rounded-xl overflow-hidden shadow-xl">
+                <div className="mt-[16px] w-full animate-[fadeIn_0.4s_ease-out]">
+                    <div className="flex flex-col bg-slate-900 border border-slate-700 border-t-[3px] border-t-blue-500 rounded-[12px] overflow-hidden shadow-lg">
                         {/* Header */}
-                        <div className="ai-box-header flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-800 p-4 border-b border-slate-700">
-                            <div className="ai-title-group flex items-center gap-2">
-                                <i className="fa-solid fa-robot text-blue-400 text-lg"></i>
-                                <span className="ai-label font-mono font-bold text-slate-300 tracking-wide text-xs md:text-sm">OPERATIONAL INTEL</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[12px] p-[16px] border-b border-slate-700/80 bg-slate-800/50">
+                            <div className="flex items-center gap-[10px]">
+                                <i className="fa-solid fa-robot text-blue-400 text-[18px]"></i>
+                                <span className="font-mono font-bold text-slate-200 tracking-wider text-[13px] md:text-[14px]">OPERATIONAL INTEL</span>
                             </div>
-                            <div className="risk-badge-container flex items-center justify-between w-full md:w-auto gap-3 bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-700">
-                                <span className="risk-label text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">THREAT LEVEL</span>
-                                <span className="risk-pill font-black text-xs md:text-sm px-2 py-0.5 rounded shadow text-slate-900" style={{ backgroundColor: getRiskColor(aiData.risk_score) }}>
+                            <div className="flex items-center justify-between sm:justify-start gap-[12px] bg-slate-950/50 px-[12px] py-[6px] rounded-[8px] border border-slate-700">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">THREAT SCORE</span>
+                                <span className="font-black text-[14px] px-[8px] py-[2px] rounded text-slate-900" style={{ backgroundColor: getRiskColor(aiData.risk_score) }}>
                                     {aiData.risk_score}/100
                                 </span>
                             </div>
                         </div>
 
                         {/* Grid Content */}
-                        <div className="ai-content-grid flex flex-col gap-5 p-5">
-                            <div className="ai-row flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-slate-400 font-bold tracking-widest uppercase flex items-center gap-2"><i className="fa-solid fa-plane-slash text-slate-500"></i> OPERATIONAL IMPACT</label>
-                                <div className="ai-text text-sm md:text-base text-slate-100 leading-relaxed bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                                    {aiData.impact || "Analyzing operational restrictions..."}
+                        <div className="flex flex-col gap-[20px] p-[20px]">
+                            <div className="flex flex-col gap-[8px]">
+                                <label className="text-[11px] md:text-[12px] text-slate-400 font-bold tracking-[0.5px] uppercase flex items-center gap-2"><i className="fa-solid fa-plane-slash text-slate-500"></i> IMPACT</label>
+                                <div className="text-[14px] md:text-[15px] text-slate-200 leading-[1.6] bg-slate-800/30 p-[16px] rounded-[10px] border border-slate-700/50 shadow-inner">
+                                    {aiData.impact || "Analyzing..."}
                                 </div>
                             </div>
 
                             {aiData.action && (
-                                <div className="ai-row action-row flex flex-col gap-2">
-                                    <label className="text-[10px] md:text-xs text-emerald-400 font-bold tracking-widest uppercase flex items-center gap-2"><i className="fa-solid fa-check-to-slot"></i> PILOT DIRECTIVE</label>
-                                    <div className="action-box flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl">
-                                        <i className="fa-solid fa-circle-exclamation text-emerald-400 mt-1"></i>
-                                        <p className="m-0 text-sm md:text-base text-emerald-100 font-medium leading-relaxed">{aiData.action}</p>
+                                <div className="flex flex-col gap-[8px]">
+                                    <label className="text-[11px] md:text-[12px] text-emerald-400 font-bold tracking-[0.5px] uppercase flex items-center gap-2"><i className="fa-solid fa-check-double"></i> DIRECTIVE</label>
+                                    <div className="flex items-start gap-[12px] bg-emerald-950/40 border border-emerald-500/30 p-[16px] rounded-[10px]">
+                                        <i className="fa-solid fa-circle-exclamation text-emerald-500 mt-[4px]"></i>
+                                        <p className="m-0 text-[14px] md:text-[15px] text-emerald-100 font-medium leading-[1.6]">{aiData.action}</p>
                                     </div>
                                 </div>
                             )}
 
                             {/* AI Disclaimer */}
-                            <div className="ai-disclaimer flex items-start gap-2 p-3 mt-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                                <i className="fa-solid fa-triangle-exclamation text-amber-500 text-xs mt-0.5"></i>
-                                <span className="text-[10px] md:text-xs text-amber-400/80 leading-relaxed font-medium">AI-generated analysis — advisory only. Verify against official NOTAM sources before execution.</span>
+                            <div className="flex items-start gap-[10px] p-[12px] mt-[4px] bg-slate-800/50 border border-slate-700 rounded-[8px]">
+                                <i className="fa-solid fa-circle-info text-slate-400 text-[12px] mt-[2px]"></i>
+                                <span className="text-[11px] text-slate-400 leading-[1.5] font-medium">AI-generated advisory. Verify against official NOTAMs prior to flight.</span>
                             </div>
                         </div>
                     </div>
