@@ -33,7 +33,7 @@ const HeroSection = () => {
 
       <div className="hero-content relative z-30 w-full max-w-5xl mx-auto px-4 py-8 md:py-12 flex flex-col items-center justify-center gap-6 animate-[fadeInUp_0.8s_ease-out]">
         {/* Branding */}
-        <div className="hero-brand flex items-center justify-center gap-3 mb-4 md:mb-8">
+        <div className="hero-brand flex items-center justify-center gap-3 mb-8 md:mb-16">
             <img src={logo} alt="NotamLens Logo" className="h-[48px] md:h-[60px] w-auto drop-shadow-lg" />
         </div>
 
