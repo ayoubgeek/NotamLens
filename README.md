@@ -1,77 +1,122 @@
-# NotamLens
+# NotamLens ✈️
 
-**Live Demo:** [https://www.notamlens.com/](https://www.notamlens.com/)
+**Live Demo:** [notamlens.com](https://www.notamlens.com/)
 
-AI-powered aviation platform that fetches, analyzes, and visualizes NOTAMs using LLMs and interactive maps.
+> **NotamLens** is an AI-powered tactical aviation intelligence platform. It ingests legacy, cryptic Notice to Air Missions (NOTAMs) from official FAA endpoints and uses Large Language Models (LLMs) to automatically translate them into structured, human-readable Commander's Briefings with actionable risk assessments.
+---
 
-## 1. 🚀 Overview
+## 📖 The Problem: Cryptic Aviation Data
+Aviation safety depends heavily on NOTAMs. However, these critical warnings are traditionally published in a dense, heavily abbreviated legacy format (e.g., `Q) EDGG/QMXLC/IV/M/A/000/999/5002N00834E005`). This forces pilots to spend significant time decoding text rather than analyzing operational risk, leading to fatigue and potential human error during pre-flight preparation.
 
-Aviation safety depends on reviewing Notices to Air Missions (NOTAMs), but these warnings are traditionally published in a cryptic, abbreviated format. **NotamLens** bridges this gap by automatically translating dense, coded warnings into clear, human-readable intelligence. By extracting coordinate data and risk classifications, it fundamentally accelerates pre-flight briefings and enhances situational awareness for modern flight crews.
+## 💡 The Solution: NotamLens
+By injecting Modern AI into the pre-flight routine, NotamLens bridges this gap.
+- **Automated Translation:** Translates dense ICAO abbreviations into clear English.
+- **Risk Assessment:** Assigns a 0-100 Threat Score and color-coded risk levels based on severity.
+- **Geospatial Context:** Plots precise NOTAM coordinates and affected radii on an interactive map.
+- **Operational Directives:** Extracts the "So What?" (Impact) and "Now What?" (Crew Action) for every alert.
 
-## 2. ✈️ Key Features
+## ✨ Key Features
+- **Real-Time Data Acquisition:** Scrapes and normalizes live NOTAM HTML data directly from official FAA sources.
+- **Dual-Model LLM Engine:** Utilizes advanced prompt engineering with Groq (Llama-3.1 primary, Mixtral fallback) to parse complex text into strict JSON schemas with near-zero latency.
+- **Semantic UI & Filtering:** A mobile-first, responsive React dashboard with dynamic categorical filters (Runways, NavAids, Closed, WIP).
+- **High-Performance Infrastructure:** Implements an aggressive in-memory caching system with MD5-deduplication to minimize LLM inference costs and reduce FAA API roundtrips.
+- **Interactive Map Visualization:** Built natively with React-Leaflet to project standard aviation Q-Code coordinates globally.
 
-- **NOTAM fetching (FAA sources)**: Actively fetches and parses real-time NOTAM HTML data directly from official sources.
-- **AI/LLM-based parsing and simplification**: Leverages modern LLMs (like Groq/LLaMA and Mixtral fallbacks) to process raw text into clean, structured "Commander's Briefs".
-- **Interactive map visualization**: Plots precise NOTAM coordinates and affected radii on an interactive Leaflet map.
-- **Fast caching system**: Employs an aggressive in-memory TTLCache with MD5-deduplication to minimize LLM latency.
-- **Clean API backend (FastAPI)**: A robust, high-performance REST API handling the scraping, validation, and delivery.
+## 🏗️ Architecture & Workflow
 
-## 3. 🧠 How It Works
+```mermaid
+graph TD
+    A[Frontend: React/Vite] -->|GET /search/ICAO| B(Backend: FastAPI)
+    B -->|Check Cache| C{Cache Hit?}
+    C -->|Yes| A
+    C -->|No| D[FAA Scraper]
+    D -->|Fetch HTML & Parse| E[Raw NOTAM List]
+    E -->|Structured Data| B
+    A -->|POST /analyze| B
+    B -->|Check Cache| F{Cache Hit?}
+    F -->|Yes| A
+    F -->|No| G[AI Engine: Groq/LLaMA]
+    G -->|Prompt Eng. -> JSON| B
+    B -->|Response| A
+```
 
-The platform operates via a streamlined pipeline:
-- **Data ingestion**: A backend scraper fetches live HTML data and extracts Q-lines using regex and BS4.
-- **AI processing**: When triggered, raw NOTAM text is sent to the LLM engine for detailed simplification and risk assessment.
-- **API**: The Python backend serves this structured data to the frontend.
-- **Frontend map**: The React client consumes the data to populate a dynamic UI dashboard and an overlaid interactive map.
+## 🛠️ Tech Stack
+- **Backend:** Python 3.13, FastAPI, Pydantic, Regular Expressions (Regex), OpenAI SDK (for Groq)
+- **Frontend:** React 18, Vite, Tailwind CSS, React-Router, React-Leaflet
+- **AI Infrastructure:** Groq API (Llama-3.1-8b-instant, Mixtral-8x7b-32768)
+- **Deployment:** Vercel (Frontend), GitHub Actions (CI/CD)
 
-## 4. 🛠 Tech Stack
+## 📁 Project Structure
+```text
+NotamLens/
+├── backend/                  # Python FastAPI Server
+│   ├── app/
+│   │   ├── api/v1/           # REST Endpoints (search, analyze)
+│   │   ├── core/             # Configuration & Exceptions
+│   │   ├── schemas/          # Pydantic Data Models
+│   │   └── services/         # FAA Scraper, AI Engine, Cache
+│   └── requirements.txt
+├── frontend/                 # React UI
+│   ├── src/
+│   │   ├── api/              # Axios Client
+│   │   ├── components/       # Responsive Components (NotamCard, Map, etc.)
+│   │   └── utils/            # Decoders & Geospatial Formatters
+│   ├── index.html
+│   └── tailwind.config.js
+└── README.md
+```
 
-- **Python / FastAPI**: High-concurrency backend services and REST API endpoints.
-- **LLM (Groq / Gemini)**: Artificial intelligence engine for parsing complex legacy text.
-- **Frontend**: React 18, Vite, Tailwind CSS for a modern, responsive user interface.
-- **Map libraries**: React-Leaflet for geospatial data plotting.
-
-## 5. 📦 Installation
-
+## 🚀 Installation & Local Setup
 **Prerequisites:** Python 3.13+ and Node.js 18+
 
-### Backend Setup
+### 1. Backend Setup
 ```bash
 git clone https://github.com/ayoubgeek/NotamLens.git
-cd NotamLens/src/backend
+cd NotamLens/backend
+
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Create .env file
+echo "GROQ_API_KEY=your_groq_api_key_here" > .env
+
+# Run the backend (Development mode)
 python -m app.main
 ```
+*The API will be available at `http://localhost:8000`*
 
-### Frontend Setup
+### 2. Frontend Setup
 ```bash
-cd ../frontend
+# Open a new terminal window
+cd NotamLens/frontend
+
+# Install dependencies
 npm install
+
+# Run the development server
 npm run dev
 ```
+*The UI will be available at `http://localhost:5173`*
 
-### Environment Variables
-Configure `.env` in `src/backend/`:
-```env
-GROQ_API_KEY=your_api_key
-REDIS_URL=redis://localhost:6379 
-```
+## 📸 Interface Previews
+| Main Dashboard | Interactive Map | Commander's Brief |
+|:---:|:---:|:---:|
+| ![Dashboard](Screen/img01.png) | ![Map](Screen/img03.png) | ![AI Brief](Screen/img02.png) |
 
-## 6. 📸 Screenshots
+## 🎓 Academic / PFE Context
+This project was developed as a **Projet de Fin d'Études (PFE)**. It demonstrates end-to-end full-stack engineering proficiency, integrating:
+- **System Design:** Handling 3rd-party unreliability (FAA legacy endpoints) via abstraction and caching.
+- **Applied AI:** Moving beyond simple conversational chatbots to strict JSON-enforced, rule-based inference.
+- **Modern UI/UX:** Translating dense data blocks into an elegant, highly-scannable interface designed for mission-critical environments.
 
-![Main Dashboard](Screen/img01.png)
-*Dashboard showing incoming NOTAMs and risk assessments.*
+## 🔜 Future Improvements
+- **Real-Time Data Pipelines:** Migrating from pull-based scraping to persistent upstream WebSockets.
+- **Spatial Intersections:** Implementing multi-ICAO querying and route-intersection detection for en-route flight planning.
+- **User Authentication:** Enabling pilot profiles to save custom fleet layouts (e.g., filtering out A320 limitations when flying a B737).
 
-![Map Overview](Screen/img03.png)
-*Geospatial representation of NOTAM boundaries.*
-
-![Commander's Brief](Screen/img02.png)
-*AI-simplified analysis view.*
-
-## 7. 📌 Future Improvements
-
-- **Real-time NOTAM updates**: Implementing WebSockets for persistent upstream connections.
-- **Flight route analysis**: Enabling comparative multi-ICAO querying and route-intersection detection.
-- **Alert system**: Setting up configurable threshold-based mobile or email push notifications.
+---
+*Built with passion for Aviation & AI.*
