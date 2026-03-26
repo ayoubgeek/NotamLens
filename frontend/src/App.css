@@ -37,19 +37,21 @@ body {
   margin: 0; 
   padding: 0;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 /* =========================================
    2. TYPOGRAPHY & ANIMATIONS
    ========================================= */
 h1 { 
-  font-size: 3.5rem; 
+  font-size: clamp(2rem, 5vw, 3.5rem); 
   font-weight: 800; 
   margin: 0 0 10px 0; 
   background: linear-gradient(to right, #fff, #94a3b8); 
@@ -66,7 +68,7 @@ h2, h3 {
 .subtitle { 
   font-size: 1.2rem;
   color: var(--text-muted); 
-  margin-bottom: 50px; 
+  margin-bottom: 30px; 
 }
 
 /* Animation Utilities */
@@ -135,6 +137,7 @@ input {
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #94a3b8;
     padding: 6px 16px;
+    min-height: 44px;
     border-radius: 8px;
     font-size: 0.85rem;
     cursor: pointer;
@@ -169,6 +172,7 @@ input {
   border: none; 
   color: #cbd5e1; 
   padding: 8px 16px; 
+  min-height: 44px;
   border-radius: 6px; 
   font-weight: 700; 
   font-size: 0.8rem; 
@@ -181,8 +185,8 @@ input {
 /* --- Q-Code Pills (Inside Cards) --- */
 .q-bar-container { 
   display: flex; 
-  gap: 12px; 
-  flex-wrap: nowrap; 
+  flex-wrap: wrap; 
+  gap: 8px; 
   align-items: center;
   margin-bottom: 15px; 
   overflow-x: auto; 
@@ -190,16 +194,16 @@ input {
 }
 
 .q-pill { 
-  padding: 8px 16px; 
+  padding: 6px 12px; 
   border-radius: 8px; 
-  font-size: 0.9rem; 
+  font-size: 0.78rem; 
   font-weight: 600; 
   font-family: 'JetBrains Mono', monospace; 
   display: flex; 
   align-items: center; 
   gap: 10px; 
-  white-space: nowrap; 
-  flex-shrink: 0; 
+  white-space: normal; 
+  flex-shrink: 1; 
 }
 
 .q-pill.blue { 
@@ -223,6 +227,7 @@ input {
   font-weight: 700; 
   font-size: 0.75rem; 
   padding: 4px 10px; 
+  min-height: 44px;
   margin-left: 10px; 
   cursor: pointer; 
   text-transform: uppercase; 
@@ -234,6 +239,7 @@ input {
     border: 1px solid #334155;
     color: #94a3b8;
     padding: 8px 16px;
+    min-height: 44px;
     border-radius: 6px;
     cursor: pointer;
     font-family: 'JetBrains Mono', monospace;
@@ -254,8 +260,10 @@ input {
   font-weight: 700;
   cursor: pointer;
   margin-top: 10px;
-  padding: 0;
-  display: block;
+  padding: 10px 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 .read-more-link:hover {
   text-decoration: underline;
@@ -268,19 +276,19 @@ input {
 /* --- Stats Grid --- */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   margin-bottom: 25px;
 }
 
 .stat-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  padding: 20px;
+  padding: 15px;
   border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   transition: transform 0.2s;
 }
 
@@ -318,7 +326,7 @@ input {
 .notam-card {
   background: var(--card-bg);
   border-radius: 12px;
-  padding: 30px; 
+  padding: 16px; 
   margin-bottom: 25px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   text-align: left;
@@ -328,8 +336,9 @@ input {
 
 .card-header { 
   display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 25px; 
 }
 
@@ -337,7 +346,7 @@ input {
   display: flex; 
   align-items: center; 
   gap: 15px; 
-  font-size: 1.3rem; 
+  font-size: 1.1rem; 
   font-weight: 700; 
   font-family: 'JetBrains Mono', monospace; 
 }
@@ -366,9 +375,11 @@ input {
 /* Dates Row inside Notam */
 .dates-row { 
   display: flex; 
+  flex-direction: column;
+  gap: 15px;
   justify-content: space-between; 
   background: #0f172a; 
-  padding: 20px 25px; 
+  padding: 15px; 
   border-radius: 8px; 
   margin-bottom: 25px; 
   border: 1px solid var(--border); 
@@ -386,7 +397,7 @@ input {
 .date-col span { 
   font-family: 'JetBrains Mono', monospace; 
   color: white; 
-  font-size: 1.1rem; 
+  font-size: 1rem; 
 }
 
 .date-col.right { text-align: right; }
@@ -398,6 +409,7 @@ input {
   color: var(--text-muted);
   border-radius: 4px;
   padding: 4px 10px;
+  min-height: 44px;
   font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
@@ -428,6 +440,7 @@ input {
   font-size: 0.9rem;
   line-height: 1.5;
   white-space: pre-wrap; 
+  word-break: break-all;
   margin: 0;
 }
 
@@ -442,7 +455,7 @@ input {
 
 .hero-container {
     position: relative;
-    height: 100vh; /* Full viewport height */
+    min-height: 100vh; /* Full viewport height */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -469,7 +482,7 @@ input {
 .hero-content {
     text-align: center;
     max-width: 900px;
-    padding: 20px;
+    padding: 15px;
     z-index: 3;
     animation: fadeInUp 0.8s ease-out;
 }
@@ -488,7 +501,7 @@ input {
 }
 
 .hero-title {
-    font-size: 4.5rem;
+    font-size: clamp(2rem, 6vw, 4.5rem);
     font-weight: 900;
     line-height: 1.1;
     margin-bottom: 20px;
@@ -504,11 +517,11 @@ input {
 }
 
 .hero-subtitle {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     color: #cbd5e1;
     margin-bottom: 50px;
     font-weight: 500;
-    max-width: 700px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -516,6 +529,8 @@ input {
 /* Hero Search Box */
 .hero-search-box {
     display: flex;
+    flex-direction: column;
+    gap: 0;
     background: rgba(30, 41, 59, 0.6);
     border: 1px solid rgba(59, 130, 246, 0.3);
     padding: 8px;
@@ -554,8 +569,9 @@ input {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border: none;
     color: white;
-    padding: 0 40px;
-    border-radius: 12px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 0 0 12px 12px;
     font-size: 1.0rem;
     font-weight: 800;
     cursor: pointer;
@@ -570,7 +586,7 @@ input {
 
 /* Popular Airports Grid */
 .popular-airports-label {
-    margin-top: 60px;
+    margin-top: 40px;
     margin-bottom: 20px;
     color: #64748b;
     font-weight: 700;
@@ -581,7 +597,7 @@ input {
 
 .hero-popular-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     max-width: 800px;
     margin: 0 auto;
@@ -703,7 +719,7 @@ input {
 .dashboard-nav {
     display: flex;
     align-items: center;
-    padding: 20px 40px;
+    padding: 15px 16px;
     background: #0f172a;
     border-bottom: 1px solid #1e293b;
 }
@@ -714,12 +730,18 @@ input {
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
     letter-spacing: 1px;
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
 .main-content { 
   max-width: 1200px; 
   margin: 0 auto; 
-  padding: 20px; 
+  padding: 12px; 
 }
 
 .dashboard-section {
@@ -729,7 +751,7 @@ input {
 .airport-header-card {
   background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   border-radius: 12px;
-  padding: 30px;
+  padding: 20px;
   color: white;
   margin-bottom: 25px;
   box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.5);
@@ -737,13 +759,14 @@ input {
 
 .airport-title-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center; 
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
 .airport-title-row h2 {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 800;
   margin: 0;
   color: white;
@@ -751,6 +774,7 @@ input {
 
 .airport-tags {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -773,15 +797,16 @@ input {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background: #0f172a;
-  padding: 15px;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
 }
 
 .filter-group-right {
-  margin-left: auto; 
+  margin-left: 0; 
+  width: 100%;
   display: flex;
   gap: 10px;
 }
@@ -790,7 +815,7 @@ input {
    8. FEATURE: MAP & LEAFLET
    ========================================= */
 .map-box { 
-  height: 500px; 
+  height: 280px; 
   border-radius: 12px; 
   overflow: hidden; 
   margin-bottom: 25px; 
@@ -815,7 +840,7 @@ input {
 
 .leaflet-popup-content {
   margin: 0 !important;
-  width: 350px !important;
+  width: 250px !important;
 }
 
 .popup-header {
@@ -845,11 +870,11 @@ input {
   width: 100%; 
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
   border: 1px solid #60a5fa;
-  padding: 18px; 
+  padding: 14px; 
   border-radius: 8px; 
   color: white; 
   font-weight: 800; 
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   cursor: pointer; 
   display: flex; 
   justify-content: center; 
@@ -879,8 +904,9 @@ input {
   padding: 12px 20px;
   border-bottom: 1px solid #334155;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .ai-title-group {
@@ -917,7 +943,7 @@ input {
 }
 
 /* Content Rows */
-.ai-content-grid { padding: 20px; }
+.ai-content-grid { padding: 15px; }
 .ai-row { margin-bottom: 20px; }
 .ai-row:last-child { margin-bottom: 0; }
 
@@ -1039,4 +1065,186 @@ input {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-size: 0.75rem;
+}
+
+/* =========================================
+   11. RESPONSIVE: MEDIA QUERIES
+   ========================================= */
+
+/* --- TABLET PORTRAIT & UP (768px+) --- */
+@media (min-width: 768px) {
+  /* Hero Section (US1) */
+  .hero-search-box {
+    flex-direction: row;
+  }
+  .hero-search-btn {
+    width: auto;
+    padding: 0 40px;
+    border-radius: 12px;
+  }
+  .hero-popular-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .hero-content {
+    padding: 20px;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem;
+    max-width: 600px;
+  }
+  .popular-airports-label {
+    margin-top: 60px;
+  }
+
+  /* Dashboard Components (US2) */
+  .dashboard-nav {
+    padding: 20px 30px;
+  }
+  .nav-title {
+    font-size: 0.85rem;
+  }
+  .airport-header-card {
+    padding: 25px;
+  }
+  .airport-title-row {
+    flex-direction: row;
+    align-items: center;
+  }
+  .airport-title-row h2 {
+    font-size: 1.7rem;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  .stat-card {
+    padding: 18px;
+  }
+  .category-bar {
+    padding: 15px;
+    gap: 12px;
+  }
+  .filter-group-right {
+    margin-left: auto;
+    width: auto;
+  }
+
+  /* NOTAM Card Components (US2) */
+  .notam-card {
+    padding: 22px;
+  }
+  .card-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  .q-bar-container {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .q-pill {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .dates-row {
+    flex-direction: row;
+    padding: 20px 25px;
+  }
+  .map-box {
+    height: 400px;
+  }
+  .leaflet-popup-content {
+    width: 300px !important;
+  }
+
+  /* AI Section (US2) */
+  .ai-btn {
+    padding: 16px;
+  }
+  .ai-box-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  .ai-content-grid {
+    padding: 18px;
+  }
+
+  /* Tablet Polish (US3) */
+  .header-left {
+    font-size: 1.3rem;
+  }
+  .date-col span {
+    font-size: 1.1rem;
+  }
+  .cat-pill {
+    padding: 8px 14px;
+  }
+}
+
+/* --- LARGE TABLET & DESKTOP (1024px+) --- */
+@media (min-width: 1024px) {
+  /* Hero Section (US1) */
+  .hero-subtitle {
+    font-size: 1.4rem;
+    max-width: 700px;
+  }
+
+  /* Dashboard Components (US2) */
+  .dashboard-nav {
+    padding: 20px 40px;
+  }
+  .nav-title {
+    font-size: inherit;
+  }
+  .airport-header-card {
+    padding: 30px;
+  }
+  .airport-title-row h2 {
+    font-size: 2rem;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .stat-card {
+    padding: 20px;
+  }
+  .notam-card {
+    padding: 30px;
+  }
+  .q-pill {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+  .map-box {
+    height: 500px;
+  }
+  .leaflet-popup-content {
+    width: 350px !important;
+  }
+  .ai-btn {
+    padding: 18px;
+  }
+  .ai-content-grid {
+    padding: 20px;
+  }
+  .main-content {
+    padding: 20px;
+  }
+}
+
+/* --- LARGE SCREENS (1440px+) --- */
+@media (min-width: 1440px) {
+  /* Large Screen Optimization (US4) */
+  .main-content {
+    max-width: 1200px;
+  }
+  .hero-content {
+    max-width: 900px;
+  }
+  .hero-search-box {
+    max-width: 700px;
+  }
+  .hero-popular-grid {
+    max-width: 800px;
+  }
 }
